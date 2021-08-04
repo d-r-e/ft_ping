@@ -24,9 +24,19 @@ static void parse_options(int argc, char *argv[])
 		usage();
 }
 
+static void statistics()
+{
+	printf("\r--- %s ft_ping statistics ---\n", g_state.host);
+	exit(0);
+}
+
 int main(int argc, char *argv[])
 {
 	ft_bzero(&g_state, sizeof(g_state));
 	parse_options(argc, argv);
+	signal(SIGINT, statistics);
+	while(42)
+	;
 	exit(0);
+
 }
