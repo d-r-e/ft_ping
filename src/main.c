@@ -40,11 +40,10 @@ static void sighandler()
 	exit(0);
 }
 
-static void leaks()
-{
-	;
-	//system("leaks ft_ping");
-}
+// static void leaks()
+// {
+// 	system("leaks ft_ping");
+// }
 
 static void ft_ping(){
 	printf("%s: %s (%s): %d data bytes\n", "PING", g_state.hostname, g_state.host, 56);
@@ -52,7 +51,7 @@ static void ft_ping(){
 
 int main(int argc, char *argv[])
 {
-	atexit(leaks);
+	//atexit(leaks);
 	ft_bzero(&g_state, sizeof(g_state));
 	parse_options(argc, argv);
 	signal(SIGINT, sighandler);
