@@ -13,6 +13,8 @@ static void parse_options(int argc, char *argv[])
 	{
 		if (ft_strlen(argv[i]) > 1 && !ft_strncmp(argv[i], "-v", 2))
 			g_state.v_opt = 1;
+		if (ft_strlen(argv[i]) > 1 && !ft_strncmp(argv[i], "-o", 2))
+			g_state.o_opt = 1;
 		else if (ft_strlen(argv[i]) > 1 && !ft_strncmp(argv[i], "-h", 2))
 			g_state.h_opt = 1;
 		else if (ft_strlen(argv[i]) && argv[i][0] == '-')
@@ -35,6 +37,10 @@ static void statistics()
 // 	system("leaks ft_ping");
 // }
 
+static void ft_ping(){
+	printf("FT_PING: %s (%s): %d data bytes\n", g_state.hostname, g_state.host, 56);
+}
+
 int main(int argc, char *argv[])
 {
 	//atexit(leaks);
@@ -42,11 +48,8 @@ int main(int argc, char *argv[])
 	parse_options(argc, argv);
 	signal(SIGINT, statistics);
 	ft_gethostbyname(g_state.hostname);
+	ft_ping();
 	while(42)
-	{
 		;
-		;
-		;
-	}
 	exit(0);
 }

@@ -10,9 +10,14 @@ const char *ft_gethostbyname(const char *name)
     hints.ai_socktype = SOCK_RAW;
     hints.ai_protocol = IPPROTO_ICMP;
     error = getaddrinfo(name, NULL , &hints, &g_state.addr_list);
-    if (error)
-        return (NULL);
-    g_state.host = inet_ntoa(((struct sockaddr_in *)g_state.addr_list->ai_addr)->sin_addr);
+    if (error == 8){
+        printf("%s: cannot resolve %s: Unknown host\n", BIN, g_state.hostname);
+        exit(68);
+    } else if (error) {
+        printf("%s: Error %d: Unknown error getting address info.\n", BIN, error);
+    }
 
+    g_state.host = inet_ntoa(((struct sockaddr_in *)g_state.addr_list->ai_addr)->sin_addr);
+    printf("%s\n", g_state.host);
     return (g_state.host);
 }

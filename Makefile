@@ -5,7 +5,7 @@ FLAGS= -Wall -Wextra -Werror -Wformat-security
 LIBFT=libft/libft.a
 INC=inc/ft_ping.h
 
-$(NAME): $(OBJ) $(INC) $(LIBFT) $(SRC) 
+$(NAME): $(SRC) $(OBJ) $(INC) $(LIBFT) 
 	gcc $(FLAGS) -L libft/ -lft $(OBJ)  -o $(NAME)
 
 $(LIBFT):

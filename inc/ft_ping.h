@@ -12,9 +12,12 @@
 # include <netdb.h>
 # include "../libft/libft.h"
 
+# define BIN "ft_ping"
+
 typedef struct s_state {
 	int			v_opt;
 	int			h_opt;
+	id_t		o_opt;
 	const char	*hostname;
 	char	*host;
 	struct addrinfo *addr_list;
