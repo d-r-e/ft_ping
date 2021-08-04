@@ -33,7 +33,7 @@ x: $(NAME)
 	./$(NAME) ""
 
 commit: all fclean
-	@git add $(SRC) Makefile $(INC)
+	@git add $(SRC) Makefile $(INC) .gitignore
 	@git commit -am "auto commit by ${USER} `date +%d-%m-%Y` from `uname -n | cut -d. -f1`"
 
 push: commit
