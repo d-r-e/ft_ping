@@ -11,11 +11,19 @@ static void parse_options(int argc, char *argv[])
 	g_state.hostname = NULL;
 	for (int i = 1; i < argc; ++i)
 	{
-		if (ft_strlen(argv[i]) > 1 && !ft_strncmp(argv[i], "-v", 2))
+		if (ft_strlen(argv[i]) > 1 && !ft_strncmp(argv[i], "-v", 3))
 			g_state.v_opt = 1;
-		if (ft_strlen(argv[i]) > 1 && !ft_strncmp(argv[i], "-o", 2))
+		else if (ft_strlen(argv[i]) > 1 && !ft_strncmp(argv[i], "-o", 3))
 			g_state.o_opt = 1;
-		else if (ft_strlen(argv[i]) > 1 && !ft_strncmp(argv[i], "-h", 2))
+		else if (ft_strlen(argv[i]) > 1 && !ft_strncmp(argv[i], "-f", 3))
+		{
+			if (getuid() != 0)
+			{
+				printf("%s: -f flag: Operation not permitted\n", BIN);
+				exit (77);
+			}
+			g_state.f_opt = 1;
+		} else if (ft_strlen(argv[i]) > 1 && !ft_strncmp(argv[i], "-h", 3))
 			g_state.h_opt = 1;
 		else if (ft_strlen(argv[i]) && argv[i][0] == '-')
 			usage();
@@ -26,30 +34,34 @@ static void parse_options(int argc, char *argv[])
 		usage();
 }
 
-static void statistics()
+static void sighandler()
 {
 	printf("\r--- %s ft_ping statistics ---\n", g_state.hostname);
 	exit(0);
 }
 
-// static void leaks()
-// {
-// 	system("leaks ft_ping");
-// }
+static void leaks()
+{
+	;
+	//system("leaks ft_ping");
+}
 
 static void ft_ping(){
-	printf("FT_PING: %s (%s): %d data bytes\n", g_state.hostname, g_state.host, 56);
+	printf("%s: %s (%s): %d data bytes\n", "PING", g_state.hostname, g_state.host, 56);
 }
 
 int main(int argc, char *argv[])
 {
-	//atexit(leaks);
+	atexit(leaks);
 	ft_bzero(&g_state, sizeof(g_state));
 	parse_options(argc, argv);
-	signal(SIGINT, statistics);
+	signal(SIGINT, sighandler);
 	ft_gethostbyname(g_state.hostname);
 	ft_ping();
-	while(42)
-		;
+	do
+	{
+		
+	} while (!g_state.o_opt);
+	
 	exit(0);
 }

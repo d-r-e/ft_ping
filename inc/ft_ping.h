@@ -17,7 +17,8 @@
 typedef struct s_state {
 	int			v_opt;
 	int			h_opt;
-	id_t		o_opt;
+	int			o_opt;
+	int			f_opt;
 	const char	*hostname;
 	char	*host;
 	struct addrinfo *addr_list;
