@@ -37,4 +37,4 @@ commit: all fclean
 	@git commit -am "auto commit by ${USER} `date +%d-%m-%Y` from `uname -n | cut -d. -f1`"
 
 push: commit
-	@git push origin master
+	@git push origin main
