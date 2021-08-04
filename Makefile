@@ -38,3 +38,5 @@ commit: all fclean
 
 push: commit
 	@git push origin main
+
+.PHONY: re all clean fclean commit push
