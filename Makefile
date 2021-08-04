@@ -1,7 +1,7 @@
 NAME=ft_ping
 SRC=src/main.c
 OBJ=obj/main.o
-FLAGS= -Wall -Wextra -Werror -L. -lft
+FLAGS= -Wall -Wextra -Werror -Wformat-security -L. -lft
 LIBFT=libft/libft.a
 INC=inc/ft_ping.h
 
@@ -38,5 +38,9 @@ commit: all fclean
 
 push: commit
 	@git push origin main
+
+test:
+	./test.sh
+
 
 .PHONY: re all clean fclean commit push
