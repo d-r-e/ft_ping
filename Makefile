@@ -1,20 +1,18 @@
 NAME=ft_ping
-SRC=src/main.c
-OBJ=obj/main.o
-FLAGS= -Wall -Wextra -Werror -Wformat-security -L. -lft
+SRC=src/main.c src/host.c
+OBJ = $(SRC:.c=.o)
+FLAGS= -Wall -Wextra -Werror -Wformat-security
 LIBFT=libft/libft.a
 INC=inc/ft_ping.h
 
 $(NAME): $(OBJ) $(INC) $(LIBFT) $(SRC) 
-	gcc $(CFLAGS) $(OBJ) -L libft/ -lft -o $(NAME)
+	gcc $(FLAGS) -L libft/ -lft $(OBJ)  -o $(NAME)
 
 $(LIBFT):
 	$(MAKE) -C libft
 
-$(OBJ): $(SRC) $(INC)
-	gcc $(CFLAGS) -c $(SRC)
-	@mv *.o obj/
-
+%.o: %.c
+	gcc $(FLAGS) -c -o $@ $<
 
 clean:
 	$(MAKE) clean -C libft
@@ -30,7 +28,7 @@ re: fclean all
 all: $(NAME)
 
 x: $(NAME)
-	./$(NAME) ""
+	./$(NAME) "8.8.8.8"
 
 commit: all fclean
 	@git add $(SRC) Makefile $(INC) .gitignore

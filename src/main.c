@@ -8,7 +8,7 @@ static void usage()
 
 static void parse_options(int argc, char *argv[])
 {
-	g_state.host = NULL;
+	g_state.hostname = NULL;
 	for (int i = 1; i < argc; ++i)
 	{
 		if (ft_strlen(argv[i]) > 1 && !ft_strncmp(argv[i], "-v", 2))
@@ -18,25 +18,35 @@ static void parse_options(int argc, char *argv[])
 		else if (ft_strlen(argv[i]) && argv[i][0] == '-')
 			usage();
 		else if (ft_strlen(argv[i]) && (argv[i][0]) != '-')
-			g_state.host=argv[i];
+			g_state.hostname=argv[i];
 	}
-	if (!g_state.host)
+	if (!g_state.hostname)
 		usage();
 }
 
 static void statistics()
 {
-	printf("\r--- %s ft_ping statistics ---\n", g_state.host);
+	printf("\r--- %s ft_ping statistics ---\n", g_state.hostname);
 	exit(0);
 }
 
+// static void leaks()
+// {
+// 	system("leaks ft_ping");
+// }
+
 int main(int argc, char *argv[])
 {
+	//atexit(leaks);
 	ft_bzero(&g_state, sizeof(g_state));
 	parse_options(argc, argv);
 	signal(SIGINT, statistics);
+	ft_gethostbyname(g_state.hostname);
 	while(42)
-	;
+	{
+		;
+		;
+		;
+	}
 	exit(0);
-
 }
