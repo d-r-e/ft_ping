@@ -7,8 +7,9 @@
 # include "../libft/libft.h"
 
 typedef struct s_state {
-	int	v_opt;
-	int	h_opt;
+	int			v_opt;
+	int			h_opt;
+	const char	*host;
 }		t_state;
 
 t_state	g_state;
