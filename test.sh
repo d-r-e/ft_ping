@@ -2,5 +2,7 @@
 BIN=ft_ping
 make
 
-./$BIN -v
-./$BIN -h
+./$BIN -o google.es
+./$BIN -o 8.8.8.8
+./$BIN -o localhost
+./$BIN -o 192.168.1.1
