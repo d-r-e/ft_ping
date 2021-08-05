@@ -8,7 +8,7 @@
 # include <arpa/inet.h>
 # include <sys/time.h>
 # include <signal.h>
-#include <netinet/ip_icmp.h>
+# include <netinet/ip_icmp.h>
 # include <sys/types.h>
 # include <netdb.h>
 # include "../libft/libft.h"
@@ -32,10 +32,17 @@ struct s_state {
 	struct addrinfo *addr_list;
 };
 
+struct ping_pkt {
+	struct icmphdr *hdr;
+	char msg[PING_SZ - sizeof(struct icmphdr)];
+};
+
 typedef struct s_state t_state;
 
 const char	*ft_gethostbyname(const char *name);
+float		timestamp(struct timeval a, struct timeval b);
 int			ft_ping(void);
+
 extern t_state	g_state;
 
 #endif
