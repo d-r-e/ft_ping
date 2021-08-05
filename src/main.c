@@ -1,6 +1,5 @@
 #include "../inc/ft_ping.h"
 
-
 static void usage()
 {
 	dprintf(STDERR_FILENO, "usage: ft_ping [-hv] host\n");

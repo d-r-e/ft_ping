@@ -6,7 +6,7 @@ LIBFT=libft/libft.a
 INC=inc/ft_ping.h
 
 $(NAME): $(SRC) $(OBJ) $(INC) $(LIBFT) 
-	gcc $(FLAGS) -Llibft -lft $(OBJ)  -o $(NAME)
+	gcc $(FLAGS) -I libft -L libft -lft $(OBJ)  -o $(NAME)
 
 $(LIBFT):
 	$(MAKE) -C libft
