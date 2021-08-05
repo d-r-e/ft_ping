@@ -1,4 +1,4 @@
-FROM debian:bullseye
+FROM debian:buster
 LABEL maintainer darodrig
 RUN apt update
 RUN apt upgrade -y
