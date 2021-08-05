@@ -31,7 +31,7 @@ x: $(NAME)
 
 commit: all test fclean 
 	@git add $(SRC) Makefile $(INC) .gitignore
-	@git commit -am "auto commit by ${USER} `date +%d-%m-%Y` from `uname -n | cut -d. -f1`"
+	@git commit -am "auto commit by darodrig `date +%d-%m-%Y` from `uname -n | cut -d. -f1`"
 
 push: commit
 	@git push origin main
