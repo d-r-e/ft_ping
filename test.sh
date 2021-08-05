@@ -1,4 +1,4 @@
-#!/bin/zsh
+#!/bin/bash
 BIN=ft_ping
 make
 

@@ -46,7 +46,7 @@ static void sighandler()
 // }
 
 static void ft_ping(){
-	printf("%s: %s (%s): %d data bytes\n", "PING", g_state.hostname, g_state.host, 56);
+	printf("%s: %s (%s): %d(%d) data bytes\n", "PING", g_state.hostname, g_state.host, 56, 84);
 }
 
 t_state g_state;

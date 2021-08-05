@@ -15,6 +15,7 @@ const char *ft_gethostbyname(const char *name)
         exit(68);
     } else if (error) {
         printf("%s: Error %d: Unknown error getting address info.\n", BIN, error);
+        exit(68);
     }
 
     g_state.host = inet_ntoa(((struct sockaddr_in *)g_state.addr_list->ai_addr)->sin_addr);
