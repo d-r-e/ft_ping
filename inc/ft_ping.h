@@ -24,10 +24,11 @@ struct s_state {
 	int			f_opt;
 	long int	s_opt;
 	int			loop;
-// tcp-ip + icmp
+// tcp-ip - icmp
 	char		*hostname;
 	char		*host;
 	int			sockfd;
+	int			ttl;
 	struct addrinfo *addr_list;
 };
 
