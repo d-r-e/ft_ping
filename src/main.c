@@ -50,7 +50,7 @@ static void ft_ping(){
 	printf("%s: %s (%s): %d data bytes\n", "PING", g_state.hostname, g_state.host, 56);
 }
 
-t_state g_state = {0, 0, 0, 0, NULL, NULL, NULL};
+t_state g_state;
 
 int main(int argc, char *argv[])
 {
