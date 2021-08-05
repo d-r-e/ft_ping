@@ -34,35 +34,64 @@ static void parse_options(int argc, char *argv[])
 		usage();
 }
 
+static void init_state()
+{
+	ft_bzero(&g_state, sizeof(g_state));
+	g_state.s_opt = PING_SZ;
+	g_state.loop = 1;
+}
+
 static void sighandler()
 {
-	printf("\r--- %s ft_ping statistics ---\n", g_state.hostname);
+	g_state.loop = 0;
 	exit(0);
 }
 
-// static void leaks()
-// {
-// 	system("leaks ft_ping");
-// }
+static int ft_ping()
+{
+	;
+	return(0);
+}
 
-static void ft_ping(){
-	printf("%s: %s (%s): %d(%d) data bytes\n", "PING", g_state.hostname, g_state.host, 56, 84);
+static int main_loop(){
+	printf("%s: %s (%s): %ld(%ld) data bytes\n", "PING", \
+		g_state.hostname, \
+		(ft_strlen(g_state.host) != 0) ? g_state.host : g_state.hostname, \
+		g_state.s_opt, \
+		g_state.s_opt + sizeof(struct icmphdr) \
+	);
+	g_state.sockfd = socket(AF_INET, SOCK_RAW, IPPROTO_ICMP);
+    if (g_state.sockfd < 0)
+    {
+        printf("nosocket\n");
+        return (-1);
+    }
+	do
+	{
+		ft_ping();
+	} while (!g_state.o_opt && g_state.loop);
+    close(g_state.sockfd);
+	printf("\r--- %s ft_ping statistics ---\n", g_state.hostname);
+
+    return (0);
+}
+
+static void cleanup(int n)
+{
+	free(g_state.host);
+	//freeaddrinfo(g_state.addr_list);
+	exit(n);
 }
 
 t_state g_state;
 
 int main(int argc, char *argv[])
 {
-	//atexit(leaks);
-	ft_bzero(&g_state, sizeof(g_state));
+	init_state();
 	parse_options(argc, argv);
 	signal(SIGINT, sighandler);
 	ft_gethostbyname(g_state.hostname);
-	ft_ping();
-	do
-	{
-		
-	} while (!g_state.o_opt);
+	main_loop();
 	
-	exit(0);
+	cleanup(0);
 }

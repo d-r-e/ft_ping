@@ -28,7 +28,7 @@ re: fclean all
 all: $(NAME)
 
 x: $(NAME)
-	./$(NAME) "8.8.8.8"
+	@./$(NAME) -o "8.8.8.8"
 
 commit: all fclean test
 	@git add $(SRC) Makefile $(INC) .gitignore
@@ -41,5 +41,8 @@ test:
 	chmod +x test.sh
 	./test.sh
 
+leaks: $(NAME)
+	valgrind --leak-check=full ./ft_ping -o 8.8.8.8 | grep SUMMARY
+	valgrind --leak-check=full ./ft_ping | grep SUMMARY
 
 .PHONY: re all clean fclean commit push

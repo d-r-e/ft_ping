@@ -18,7 +18,7 @@ const char *ft_gethostbyname(const char *name)
         exit(68);
     }
 
-    g_state.host = inet_ntoa(((struct sockaddr_in *)g_state.addr_list->ai_addr)->sin_addr);
+    g_state.host = ft_strdup(inet_ntoa(((struct sockaddr_in *)g_state.addr_list->ai_addr)->sin_addr));
     //printf("%s\n", g_state.host);
     return (g_state.host);
 }

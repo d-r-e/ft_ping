@@ -8,19 +8,26 @@
 # include <arpa/inet.h>
 # include <sys/time.h>
 # include <signal.h>
+#include <netinet/ip_icmp.h>
 # include <sys/types.h>
 # include <netdb.h>
 # include "../libft/libft.h"
 
 # define BIN "ft_ping"
+# define PING_SZ 56
 
 struct s_state {
+// command options
 	int			v_opt;
 	int			h_opt;
 	int			o_opt;
 	int			f_opt;
-	char	*hostname;
-	char	*host;
+	long int	s_opt;
+	int			loop;
+// tcp-ip + icmp
+	char		*hostname;
+	char		*host;
+	int			sockfd;
 	struct addrinfo *addr_list;
 };
 
