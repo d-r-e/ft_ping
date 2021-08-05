@@ -14,7 +14,7 @@
 # include "../libft/libft.h"
 
 # define BIN "ft_ping"
-# define PING_SZ 56
+# define PING_SZ 64
 
 struct s_state {
 // command options

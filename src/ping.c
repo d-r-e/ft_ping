@@ -36,10 +36,10 @@ int ft_ping()
         printf("%s: error: sendto failed\n", BIN);
         return (-1);
     }
-    usleep(100000);
+    // usleep(100000);
     addr_len = sizeof(r_addr);
     (void)addr_len;
-    //err = recvfrom(g_state.sockfd, &pckt, 0, sizeof(pckt), (struct sockaddr*)&r_addr, &addr_len);
+    err = recvfrom(g_state.sockfd, &pckt, 0, sizeof(pckt), (struct sockaddr*)&r_addr, &addr_len);
     //err = recvfrom(g_state.sockfd, (void*)&pckt, sizeof(pckt), 0, (struct sockaddr*)&r_addr, &addr_len);
     gettimeofday(&t, NULL);
     printf("time=%.2f ms\n", elapsed(t,t0));
