@@ -24,7 +24,6 @@ typedef struct s_state {
 	struct addrinfo *addr_list;
 }		t_state;
 
-
 const char *ft_gethostbyname(const char *name);
 
 t_state	g_state;
