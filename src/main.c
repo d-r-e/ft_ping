@@ -44,7 +44,6 @@ static void init_state()
 static void sighandler()
 {
 	g_state.loop = 0;
-	exit(0);
 }
 
 static int ft_ping()
@@ -69,7 +68,7 @@ static int main_loop(){
 	do
 	{
 		ft_ping();
-	} while (!g_state.o_opt && g_state.loop);
+	} while (!g_state.o_opt && g_state.loop == 1);
     close(g_state.sockfd);
 	printf("\r--- %s ft_ping statistics ---\n", g_state.hostname);
 
