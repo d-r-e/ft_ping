@@ -55,10 +55,13 @@ static int main_loop(){
 		g_state.s_opt, \
 		g_state.s_opt + sizeof(struct icmphdr) \
 	);
-	g_state.sockfd = socket(AF_INET, SOCK_RAW, IPPROTO_ICMP);
+	if (getuid() != 0)
+		g_state.sockfd = socket(AF_INET, SOCK_DGRAM, IPPROTO_ICMP);
+	else
+		g_state.sockfd = socket(AF_INET, SOCK_RAW, IPPROTO_ICMP);
     if (g_state.sockfd < 0)
     {
-        printf("nosocket\n");
+        printf("%s: error: no socket\n", BIN);
         return (-1);
     }
 	do

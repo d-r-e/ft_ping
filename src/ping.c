@@ -1,11 +1,11 @@
 #include "../inc/ft_ping.h"
 
-static unsigned char checksum (unsigned char *ptr, size_t len) {
-    unsigned char chk = 0;
-    while (len--)
-        chk -= *ptr++;
-    return chk;
-}
+// static unsigned char checksum (unsigned char *ptr, size_t len) {
+//     unsigned char chk = 0;
+//     while (len--)
+//         chk -= *ptr++;
+//     return chk;
+// }
 
 int ft_ping()
 {
@@ -20,16 +20,15 @@ int ft_ping()
 
     gettimeofday(&t0, NULL);
     bzero(&pckt, sizeof(pckt));
-          
-        pckt.hdr.type = ICMP_ECHO;
-        pckt.hdr.un.echo.id = getpid();
-          
-        for ( i = 0; i < sizeof(pckt.msg)-1; i++ )
-            pckt.msg[i] = i + '0';
-          
-        pckt.msg[i] = 0;
-        pckt.hdr.un.echo.sequence = msg_count++;
-        pckt.hdr.checksum = checksum((unsigned char*)&pckt, sizeof(pckt));
+    pckt.hdr.type = ICMP_ECHO; // 8
+    pckt.hdr.un.echo.id = getpid();
+        
+    for ( i = 0; i < sizeof(pckt.msg)-1; i++ )
+        pckt.msg[i] = i + '0';
+        
+    pckt.msg[i] = 0;
+    pckt.hdr.un.echo.sequence = msg_count++;
+    //pckt.hdr.checksum = checksum((unsigned char*)&pckt, sizeof(pckt));
     err = sendto(g_state.sockfd, (void*)&pckt, sizeof(pckt), 0, (struct sockaddr *)g_state.addr_list, sizeof(*g_state.addr_list));
     if (err == -1)
     {
@@ -41,6 +40,11 @@ int ft_ping()
     (void)addr_len;
     err = recvfrom(g_state.sockfd, &pckt, 0, sizeof(pckt), (struct sockaddr*)&r_addr, &addr_len);
     //err = recvfrom(g_state.sockfd, (void*)&pckt, sizeof(pckt), 0, (struct sockaddr*)&r_addr, &addr_len);
+    if (err == -1)
+    {
+        printf("%s: error: recvfrom failed\n", BIN);
+        return (-1);
+    }
     gettimeofday(&t, NULL);
     printf("time=%.2f ms\n", elapsed(t,t0));
 

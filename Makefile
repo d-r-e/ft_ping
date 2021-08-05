@@ -37,8 +37,7 @@ push: commit
 	@git push origin main
 
 test:
-	chmod +x test.sh
-	./test.sh
+	bash test.sh
 
 leaks: $(NAME)
 	valgrind --leak-check=full ./ft_ping -o 8.8.8.8 | grep SUMMARY
