@@ -30,13 +30,13 @@ int ft_ping()
         pckt.msg[i] = 0;
         pckt.hdr.un.echo.sequence = msg_count++;
         pckt.hdr.checksum = checksum((unsigned char*)&pckt, sizeof(pckt));
-    usleep(100000);
     err = sendto(g_state.sockfd, (void*)&pckt, sizeof(pckt), 0, (struct sockaddr *)g_state.addr_list, sizeof(*g_state.addr_list));
     if (err == -1)
     {
         printf("%s: error: sendto failed\n", BIN);
         return (-1);
     }
+    usleep(100000);
     addr_len = sizeof(r_addr);
     (void)addr_len;
     //err = recvfrom(g_state.sockfd, &pckt, 0, sizeof(pckt), (struct sockaddr*)&r_addr, &addr_len);
