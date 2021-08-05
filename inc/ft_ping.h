@@ -34,8 +34,8 @@ struct s_state {
 typedef struct s_state t_state;
 
 
-const char *ft_gethostbyname(const char *name);
-
+const char	*ft_gethostbyname(const char *name);
+int			ft_ping(void);
 extern t_state	g_state;
 
 #endif

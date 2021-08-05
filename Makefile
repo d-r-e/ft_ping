@@ -1,5 +1,5 @@
 NAME=ft_ping
-SRC=src/main.c src/host.c
+SRC=src/main.c src/host.c src/ping.c
 OBJ = $(SRC:.c=.o)
 FLAGS= -Wall -Wextra -Werror -Wformat-security
 LIBFT=libft/libft.a

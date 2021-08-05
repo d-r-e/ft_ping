@@ -46,11 +46,6 @@ static void sighandler()
 	g_state.loop = 0;
 }
 
-static int ft_ping()
-{
-	;
-	return(0);
-}
 
 static int main_loop(){
 	printf("%s: %s (%s): %ld(%ld) data bytes\n", "PING", \
