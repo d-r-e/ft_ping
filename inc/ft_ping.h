@@ -14,7 +14,7 @@
 
 # define BIN "ft_ping"
 
-typedef struct s_state {
+struct s_state {
 	int			v_opt;
 	int			h_opt;
 	int			o_opt;
@@ -22,11 +22,13 @@ typedef struct s_state {
 	char	*hostname;
 	char	*host;
 	struct addrinfo *addr_list;
-}		t_state;
+};
+
+typedef struct s_state t_state;
 
 
 const char *ft_gethostbyname(const char *name);
 
-t_state	g_state;
+extern t_state	g_state;
 
 #endif

@@ -1,5 +1,6 @@
 #include "../inc/ft_ping.h"
 
+
 static void usage()
 {
 	dprintf(STDERR_FILENO, "usage: ft_ping [-hv] host\n");
@@ -48,6 +49,8 @@ static void sighandler()
 static void ft_ping(){
 	printf("%s: %s (%s): %d data bytes\n", "PING", g_state.hostname, g_state.host, 56);
 }
+
+t_state g_state = {0, 0, 0, 0, NULL, NULL, NULL};
 
 int main(int argc, char *argv[])
 {
