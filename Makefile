@@ -30,7 +30,7 @@ all: $(NAME)
 x: $(NAME)
 	./$(NAME) "8.8.8.8"
 
-commit: all fclean
+commit: all fclean test
 	@git add $(SRC) Makefile $(INC) .gitignore
 	@git commit -am "auto commit by ${USER} `date +%d-%m-%Y` from `uname -n | cut -d. -f1`"
 
