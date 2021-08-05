@@ -19,10 +19,11 @@ typedef struct s_state {
 	int			h_opt;
 	int			o_opt;
 	int			f_opt;
-	const char	*hostname;
+	char	*hostname;
 	char	*host;
 	struct addrinfo *addr_list;
 }		t_state;
+
 
 const char *ft_gethostbyname(const char *name);
 
