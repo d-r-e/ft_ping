@@ -33,14 +33,14 @@ struct s_state {
 };
 
 struct ping_pkt {
-	struct icmphdr *hdr;
+	struct icmphdr hdr;
 	char msg[PING_SZ - sizeof(struct icmphdr)];
 };
 
 typedef struct s_state t_state;
 
 const char	*ft_gethostbyname(const char *name);
-float		timestamp(struct timeval a, struct timeval b);
+float		elapsed(struct timeval a, struct timeval b);
 int			ft_ping(void);
 
 extern t_state	g_state;
