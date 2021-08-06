@@ -48,6 +48,31 @@ static void sighandler()
 	printf("\r");
 }
 
+static int get_socket()
+{
+	struct timeval timeout;
+
+	timeout.tv_sec = DEFAULT_TIMEOUT;
+    timeout.tv_usec = 0;
+	g_state.sockfd = socket(AF_INET, SOCK_RAW, IPPROTO_ICMP);
+    if (g_state.sockfd < 0)
+    {
+        printf("%s: error: no socket\n", BIN);
+        return (-1);
+    }
+	if (setsockopt(g_state.sockfd, SOL_IP, IP_TTL, 
+               &timeout, sizeof(timeout)) != 0)
+    {
+        printf("%s: \nSetting socket options \
+                 to TTL failed!\n", BIN);
+        return (-1);
+    } 
+    // setting timeout of recv setting
+    setsockopt(g_state.sockfd, SOL_SOCKET, SO_RCVTIMEO,
+                   (const char*)&timeout, sizeof timeout);
+	return (g_state.sockfd);
+}
+
 static int main_loop(){
 	printf("%s: %s (%s): %ld(%ld) data bytes\n", "PING", \
 		g_state.hostname, \
@@ -55,12 +80,8 @@ static int main_loop(){
 		g_state.s_opt, \
 		g_state.s_opt + sizeof(struct icmphdr) \
 	);
-	g_state.sockfd = socket(AF_INET, SOCK_RAW, IPPROTO_ICMP);
-    if (g_state.sockfd < 0)
-    {
-        printf("%s: error: no socket\n", BIN);
-        return (-1);
-    }
+	if (get_socket() < 0)
+		return (-1);
 	do
 	{
 		ft_ping();
@@ -70,11 +91,11 @@ static int main_loop(){
     return (0);
 }
 
-static void cleanup(int n)
+void ft_exit(int status)
 {
 	free(g_state.host);
-	//freeaddrinfo(g_state.addr_list);
-	exit(n);
+	freeaddrinfo(g_state.addr_list);
+	exit(status);
 }
 
 t_state g_state;
@@ -87,5 +108,5 @@ int main(int argc, char *argv[])
 	ft_gethostbyname(g_state.hostname);
 	main_loop();
 	
-	cleanup(0);
+	ft_exit(0);
 }

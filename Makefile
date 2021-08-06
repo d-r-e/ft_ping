@@ -40,7 +40,7 @@ test:
 	bash test.sh
 
 leaks: $(NAME)
-	valgrind --leak-check=full ./ft_ping -o 8.8.8.8 | grep SUMMARY
-	valgrind --leak-check=full ./ft_ping | grep SUMMARY
+	valgrind --leak-check=full ./ft_ping -o localhost
+	
 
 .PHONY: re all clean fclean commit push

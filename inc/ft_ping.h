@@ -15,7 +15,7 @@
 
 # define BIN "ft_ping"
 # define PING_SZ 64
-
+# define DEFAULT_TIMEOUT 1
 struct s_state {
 // command options
 	int			v_opt;
@@ -45,6 +45,11 @@ const char	*ft_gethostbyname(const char *name);
 float		elapsed(struct timeval a, struct timeval b);
 int			ft_ping(void);
 void		print_stats(void);
+void		ft_exit(int status);
+
+
+void ft_sleep(unsigned long long sec);
+void ft_usleep(unsigned long long usec);
 
 extern t_state	g_state;
 
