@@ -1,11 +1,11 @@
 NAME=ft_ping
-SRC=src/main.c src/host.c src/ping.c src/time.c
+SRC=src/main.c src/host.c src/ping.c src/time.c src/stats.c
 OBJ = $(SRC:.c=.o)
 FLAGS= -Wall -Wextra -Werror -Wformat-security
 LIBFT=libft/libft.a
 INC=inc/ft_ping.h
 
-$(NAME): $(SRC) $(OBJ) $(INC) $(LIBFT) 
+$(NAME): $(INC) $(SRC) $(OBJ) $(LIBFT) 
 	gcc $(FLAGS) $(OBJ) -I libft -L libft -lft -o $(NAME)
 
 $(LIBFT):
@@ -30,7 +30,7 @@ x: $(NAME)
 	@./$(NAME) -o "8.8.8.8"
 
 commit: all test fclean 
-	@git add $(SRC) Makefile $(INC) .gitignore
+	@git add $(SRC) Makefile $(INC) .gitignore test.sh Dockerfile start_env.sh
 	@git commit -am "auto commit by darodrig `date +%d-%m-%Y` from `uname -n | cut -d. -f1`"
 
 push: commit

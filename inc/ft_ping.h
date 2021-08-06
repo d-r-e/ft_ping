@@ -44,7 +44,7 @@ typedef struct s_state t_state;
 const char	*ft_gethostbyname(const char *name);
 float		elapsed(struct timeval a, struct timeval b);
 int			ft_ping(void);
-int			imroot();
+void		print_stats(void);
 
 extern t_state	g_state;
 

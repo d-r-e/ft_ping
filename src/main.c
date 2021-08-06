@@ -17,7 +17,7 @@ static void parse_options(int argc, char *argv[])
 			g_state.o_opt = 1;
 		else if (ft_strlen(argv[i]) > 1 && !ft_strncmp(argv[i], "-f", 3))
 		{
-			if (imroot() == 0)
+			if (getuid())
 			{
 				printf("%s: -f flag: Operation not permitted\n", BIN);
 				exit (77);
@@ -55,10 +55,7 @@ static int main_loop(){
 		g_state.s_opt, \
 		g_state.s_opt + sizeof(struct icmphdr) \
 	);
-	if (getuid())
-		g_state.sockfd = socket(AF_INET, SOCK_DGRAM, IPPROTO_ICMP);
-	else
-		g_state.sockfd = socket(AF_INET, SOCK_RAW, IPPROTO_ICMP);
+	g_state.sockfd = socket(AF_INET, SOCK_RAW, IPPROTO_ICMP);
     if (g_state.sockfd < 0)
     {
         printf("%s: error: no socket\n", BIN);
@@ -69,7 +66,7 @@ static int main_loop(){
 		ft_ping();
 	} while (!g_state.o_opt && g_state.loop == 1);
     close(g_state.sockfd);
-	printf("--- %s ft_ping statistics ---\n", g_state.hostname);
+	print_stats();
     return (0);
 }
 
