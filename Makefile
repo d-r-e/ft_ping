@@ -31,7 +31,7 @@ x: $(NAME)
 
 commit: all test fclean 
 	@git add $(SRC) Makefile $(INC) .gitignore test.sh Dockerfile start_env.sh
-	@git commit -am "auto commit by darodrig `date +%d-%m-%Y` from $MACHINE"
+	@git commit -am "auto commit by darodrig `date +%d-%m-%Y` from ${MACHINE}"
 
 push: commit
 	@git push origin main
