@@ -29,6 +29,8 @@ struct s_state {
 	char		*host;
 	int			sockfd;
 	int			ttl;
+	unsigned int	p_transmitted;
+	unsigned int	p_received;
 	struct addrinfo *addr_list;
 };
 
@@ -42,6 +44,7 @@ typedef struct s_state t_state;
 const char	*ft_gethostbyname(const char *name);
 float		elapsed(struct timeval a, struct timeval b);
 int			ft_ping(void);
+int			imroot();
 
 extern t_state	g_state;
 

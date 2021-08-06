@@ -17,7 +17,7 @@ static void parse_options(int argc, char *argv[])
 			g_state.o_opt = 1;
 		else if (ft_strlen(argv[i]) > 1 && !ft_strncmp(argv[i], "-f", 3))
 		{
-			if (getuid() != 0)
+			if (imroot() == 0)
 			{
 				printf("%s: -f flag: Operation not permitted\n", BIN);
 				exit (77);
@@ -55,7 +55,7 @@ static int main_loop(){
 		g_state.s_opt, \
 		g_state.s_opt + sizeof(struct icmphdr) \
 	);
-	if (getuid() != 0)
+	if (getuid())
 		g_state.sockfd = socket(AF_INET, SOCK_DGRAM, IPPROTO_ICMP);
 	else
 		g_state.sockfd = socket(AF_INET, SOCK_RAW, IPPROTO_ICMP);

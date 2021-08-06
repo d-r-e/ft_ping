@@ -1,5 +1,10 @@
 #include "../inc/ft_ping.h"
 
+int imroot()
+{
+    return (getuid() == 0);
+}
+
 const char *ft_gethostbyname(const char *name)
 {
     struct addrinfo hints = {0};
