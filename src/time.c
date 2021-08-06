@@ -37,11 +37,11 @@ void ft_usleep(long long usec)
         return;
     gettimeofday(&t0, NULL);
     gettimeofday(&t1, NULL);
-    ms0 = t0.tv_sec * 1000 + t0.tv_usec / 1000;
-    ms1 = t1.tv_sec * 1000 + t1.tv_usec / 1000;
+    ms0 = t0.tv_sec * 1000000 + t0.tv_usec;
+    ms1 = t1.tv_sec * 1000000 + t1.tv_usec;
     while (ms1 - ms0 < usec){
         gettimeofday(&t1, NULL);
         
-        ms1 = t1.tv_sec * 1000 + t1.tv_usec / 1000;
+        ms1 = t1.tv_sec * 1000000 + t1.tv_usec;
         }
 }
