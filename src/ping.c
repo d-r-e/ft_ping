@@ -48,18 +48,17 @@ int ft_ping()
     g_state.p_transmitted++;
     // usleep(100000);
     addr_len = sizeof(r_addr);
-    (void)addr_len;
     err = recvfrom(g_state.sockfd, &pckt, 0, sizeof(pckt), (struct sockaddr*)&r_addr, &addr_len);
     //err = recvfrom(g_state.sockfd, (void*)&pckt, sizeof(pckt), 0, (struct sockaddr*)&r_addr, &addr_len);
     gettimeofday(&t, NULL);
-    g_state.p_received++;
-    printf("%d bytes from %s: icmp_seq=%u ttl=%d time=%.3f ms\n", \
-        PING_SZ, g_state.host, g_state.p_transmitted - 1, g_state.ttl, elapsed(t,t0));
     if (err == -1)
     {
         printf("%s: error: recvfrom failed\n", BIN);
         return (-1);
     }
+    g_state.p_received++;
+    printf("%d bytes from %s: icmp_seq=%u ttl=%d time=%.3f ms\n", \
+        PING_SZ, g_state.host, g_state.p_transmitted - 1, g_state.ttl, elapsed(t,t0));
 
 	return(0);
 }

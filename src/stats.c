@@ -7,7 +7,7 @@ void print_stats()
     if (g_state.p_transmitted == 0)
         percent = 0;
     else
-        percent = 100.0 * (double)g_state.p_received / (double)g_state.p_transmitted;
+        percent = 100.0 * (g_state.p_transmitted - g_state.p_received) / g_state.p_transmitted;
     printf("--- %s ft_ping statistics ---\n", g_state.hostname);
     printf("%d packets transmitted, %d packets received, %0.0f%% packet loss\n", \
         g_state.p_transmitted, g_state.p_received, \
