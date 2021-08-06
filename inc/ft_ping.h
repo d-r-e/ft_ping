@@ -48,8 +48,8 @@ void		print_stats(void);
 void		ft_exit(int status);
 
 
-void ft_sleep(unsigned long long sec);
-void ft_usleep(unsigned long long usec);
+void ft_sleep( long long sec);
+void ft_usleep( long long usec);
 
 extern t_state	g_state;
 

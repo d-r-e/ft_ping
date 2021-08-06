@@ -6,29 +6,42 @@ float elapsed(struct timeval a, struct timeval b)
         ((float)(a.tv_sec - b.tv_sec)) * 1000);
 }
 
-void ft_sleep(unsigned long long sec)
+void ft_sleep(long long sec)
 {
     struct timeval t0;
     struct timeval t1;
-
+    long long ms0;
+    long long ms1;
+    
     if (sec <= 0)
         return;
     gettimeofday(&t0, NULL);
     gettimeofday(&t1, NULL);
-    while ((unsigned long long)(t1.tv_sec - t0.tv_sec) < sec)
-        ;
+    ms0 = t0.tv_sec * 1000 + t0.tv_usec / 1000;
+    ms1 = t1.tv_sec * 1000 + t1.tv_usec / 1000;
+    while (ms1 - ms0 < sec * 1000)
+    {
+        gettimeofday(&t1, NULL);   
+        ms1 = t1.tv_sec * 1000 + t1.tv_usec / 1000;
+    }
 }
 
-void ft_usleep(unsigned long long usec)
+void ft_usleep(long long usec)
 {
     struct timeval t0;
     struct timeval t1;
-
+    long long ms0;
+    long long ms1;
+    
     if (usec <= 0)
         return;
-    ft_sleep(usec / 1000000000);
     gettimeofday(&t0, NULL);
     gettimeofday(&t1, NULL);
-    while ((unsigned long long)(t1.tv_usec - t0.tv_usec) < usec)
-        ;
+    ms0 = t0.tv_sec * 1000 + t0.tv_usec / 1000;
+    ms1 = t1.tv_sec * 1000 + t1.tv_usec / 1000;
+    while (ms1 - ms0 < usec){
+        gettimeofday(&t1, NULL);
+        
+        ms1 = t1.tv_sec * 1000 + t1.tv_usec / 1000;
+        }
 }

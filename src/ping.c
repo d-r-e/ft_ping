@@ -37,7 +37,7 @@ int ft_ping()
 
     ft_bzero(&pckt, sizeof(pckt));
     build_ping_packet(pckt);
-    sleep(1);
+    ft_sleep(1);
     gettimeofday(&t0, NULL);
     err = sendto(g_state.sockfd, (void*)&pckt, sizeof(pckt), 0, (struct sockaddr *)g_state.addr_list, sizeof(*g_state.addr_list));
     if (err == -1)
