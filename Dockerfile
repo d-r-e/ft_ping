@@ -4,7 +4,7 @@ RUN apt-get update
 RUN apt-get upgrade -y
 RUN apt-get install -y vim gcc make watch git man
 RUN apt-get install -y valgrind
-RUN apt-get install -y inetutils-ping libcap2-bin
+RUN apt-get install -y inetutils-ping libcap2-bin tcpdump
 RUN useradd darodrig
 RUN usermod -aG sudo darodrig
 WORKDIR /ft_ping
