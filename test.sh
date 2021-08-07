@@ -2,11 +2,11 @@
 BIN=ft_ping
  make
 
-./$BIN -o google.es
-./$BIN -o 8.8.8.8
-./$BIN -o localhost
-./$BIN -o 192.168.1.1
-./$BIN -o -v elpais.com
+./$BIN -c 1 google.es
+./$BIN -c 1 8.8.8.8
+./$BIN -c 1 localhost
+./$BIN -c 1 192.168.1.1
+./$BIN -c 1 -v elpais.com
 
 exit
 
@@ -15,9 +15,9 @@ exit
 */
 
 
-su darodrig -c "~/ft_ping/ft_ping -o google.es"
-su darodrig -c "~/ft_ping/ft_ping -o 8.8.8.8"
-su darodrig -c "~/ft_ping/ft_ping -o localhost"
-su darodrig -c "~/ft_ping/ft_ping -o 192.168.1.1"
-su darodrig -c "~/ft_ping/ft_ping -o -v elpais.com"
+su darodrig -c "./ft_ping -c 2 google.es"
+su darodrig -c "./ft_ping -c 2 8.8.8.8"
+su darodrig -c "./ft_ping -c 2 localhost"
+su darodrig -c "./ft_ping -c 2 192.168.1.1"
+su darodrig -c "./ft_ping -c 2 elpais.com"
 exit 0

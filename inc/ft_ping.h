@@ -26,7 +26,7 @@ struct s_state {
 // command options
 	int			v_opt;
 	int			h_opt;
-	int			o_opt;
+	int			c_opt;
 	int			f_opt;
 	long int	s_opt;
 	int			loop;

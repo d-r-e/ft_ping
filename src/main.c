@@ -13,8 +13,15 @@ static void parse_options(int argc, char *argv[])
 	{
 		if (ft_strlen(argv[i]) > 1 && !ft_strncmp(argv[i], "-v", 3))
 			g_state.v_opt = 1;
-		else if (ft_strlen(argv[i]) > 1 && !ft_strncmp(argv[i], "-o", 3))
-			g_state.o_opt = 1;
+		else if (!ft_strncmp(argv[i], "-c", ft_strlen("-c") + 1) )
+		{
+			if (i + 1 < argc)
+				g_state.c_opt = ft_atoi(argv[++i]);
+			else
+				g_state.c_opt = 0;
+			if (g_state.c_opt <= 0)
+				usage();
+		}
 		else if (ft_strlen(argv[i]) > 1 && !ft_strncmp(argv[i], "-f", 3))
 		{
 			if (getuid())
@@ -81,15 +88,16 @@ static int main_loop(){
 		g_state.s_opt, \
 		g_state.s_opt + sizeof(struct icmphdr) \
 	);
-	if (get_socket() < 0)
+	if (g_state.c_opt <= 0 || get_socket() < 0)
 		return (-1);
 	do
 	{
 		ft_ping();
-		if (!g_state.o_opt)
+		--g_state.c_opt;
+		if (g_state.c_opt)
 		    ft_sleep(1);
 
-	} while (!g_state.o_opt && g_state.loop == 1);
+	} while (g_state.c_opt && g_state.loop == 1);
     close(g_state.sockfd);
 	print_stats();
     return (0);
