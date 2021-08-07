@@ -98,7 +98,7 @@ static int main_loop(){
 void ft_exit(int status)
 {
 	free(g_state.host);
-	freeaddrinfo(g_state.addr_list);
+	freeaddrinfo(g_state.addr_list); // is this function forbidden?
 	exit(status);
 }
 
