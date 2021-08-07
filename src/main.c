@@ -54,6 +54,7 @@ static void init_state()
 {
 	ft_bzero(&g_state, sizeof(g_state));
 	g_state.time = NULL;
+	g_state.c_opt = -1;
 	g_state.s_opt = PING_SZ;
 	g_state.ttl = 37;
 	g_state.loop = 1;
@@ -103,7 +104,7 @@ static int main_loop(){
 		g_state.s_opt, \
 		g_state.s_opt + sizeof(struct icmphdr) \
 	);
-	if (g_state.c_opt <= 0 || get_socket() < 0)
+	if (g_state.c_opt == 0 || get_socket() < 0)
 		return (-1);
 	do
 	{
