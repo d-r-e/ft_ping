@@ -80,10 +80,12 @@ static int get_socket()
 	if (setsockopt(g_state.sockfd, SOL_IP, (IP_TTL), 
                &timeout, sizeof(timeout)) != 0)
     {
-        printf("%s: \nSetting socket options \
-                 to sending TTL failed!\n", BIN);
+        printf("%s: \nError setting sendto TTL!\n", BIN);
         return (-1);
     } 
+	int ttl = g_state.ttl;
+	if (setsockopt(g_state.sockfd, IPPROTO_ICMP, IP_TTL, &ttl, sizeof(ttl)))
+		return(printf("%s: error setting ttl\n", BIN));
     if (setsockopt(g_state.sockfd, SOL_SOCKET, SO_RCVTIMEO,
                    (const void*)&timeout, sizeof timeout) != 0)
 	{
