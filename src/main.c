@@ -18,8 +18,17 @@ static void parse_options(int argc, char *argv[])
 			if (i + 1 < argc)
 				g_state.c_opt = ft_atoi(argv[++i]);
 			else
-				g_state.c_opt = 0;
+				usage();
 			if (g_state.c_opt <= 0)
+				usage();
+		}
+		else if (!ft_strncmp(argv[i], "--ttl", ft_strlen("--ttl") + 1) )
+		{
+			if (i + 1 < argc)
+				g_state.ttl = ft_atoi(argv[++i]);
+			else
+				g_state.ttl = DEFAULT_TTL;
+			if (g_state.ttl <= 0)
 				usage();
 		}
 		else if (ft_strlen(argv[i]) > 1 && !ft_strncmp(argv[i], "-f", 3))
@@ -60,7 +69,7 @@ static int get_socket()
 {
 	struct timeval timeout;
 
-	timeout.tv_sec = DEFAULT_TIMEOUT;
+	timeout.tv_sec = 1;
     timeout.tv_usec = 0;
 	g_state.sockfd = socket(AF_INET, SOCK_RAW, IPPROTO_ICMP);
     if (g_state.sockfd < 0)
@@ -76,8 +85,13 @@ static int get_socket()
         return (-1);
     } 
     // setting timeout of recv setting
-    setsockopt(g_state.sockfd, SOL_SOCKET, SO_RCVTIMEO,
-                   (const char*)&timeout, sizeof timeout);
+    if (setsockopt(g_state.sockfd, SOL_SOCKET, SO_RCVTIMEO,
+                   (const void*)&timeout, sizeof timeout) != 0)
+	{
+			printf("%s: \nSetting socket options \
+                 to TTL failed!\n", BIN);
+		return (-1);
+	}
 	return (g_state.sockfd);
 }
 

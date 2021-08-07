@@ -21,3 +21,13 @@ su darodrig -c "./ft_ping -c 2 localhost"
 su darodrig -c "./ft_ping -c 2 192.168.1.1"
 su darodrig -c "./ft_ping -c 2 elpais.com"
 exit 0
+
+#  internship 11.91
+# drquine 12.22
+# nm otool 12.66
+# dslr
+# linear regression
+# snow crash
+# ft ping
+# rainfall
+# multilayer perceptron
