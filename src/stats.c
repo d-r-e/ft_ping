@@ -1,5 +1,46 @@
 #include "../inc/ft_ping.h"
 
+double ft_pow(double base, double exp)
+{
+    long double n;
+
+    if (exp < 0)
+        return (0);
+    if (exp == 0)
+        return (1);
+    n = base;
+    while (--exp){
+        n = n * base;
+    }
+    return (n);
+}
+
+double ft_mean(double data[], int n)
+{
+    double sum;
+    
+    if (!data || n <= 0)
+        return (0);
+    sum = 0;
+    for (int i = 0; i < n; ++i)
+        sum += data[i];
+    return (sum / n);
+}
+
+double ft_variance(double data[], int n)
+{
+    double std;
+    double mean;
+
+    if (!data || n <= 0)
+        return (0);
+    mean = ft_mean(data, n);
+    std = 0;
+    for (int i = 0; i < n; ++i)
+        std += ft_pow(data[i] - mean, 2);
+    return (std / n);
+}
+
 void print_stats()
 {
     double percent;

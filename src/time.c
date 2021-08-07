@@ -19,8 +19,7 @@ void ft_sleep(long long sec)
     gettimeofday(&t1, NULL);
     ms0 = t0.tv_sec * 1000 + t0.tv_usec / 1000;
     ms1 = t1.tv_sec * 1000 + t1.tv_usec / 1000;
-    while (ms1 - ms0 < sec * 1000)
-    {
+    while (g_state.loop && ms1 - ms0 < sec * 1000){
         gettimeofday(&t1, NULL);   
         ms1 = t1.tv_sec * 1000 + t1.tv_usec / 1000;
     }
@@ -39,9 +38,8 @@ void ft_usleep(long long usec)
     gettimeofday(&t1, NULL);
     ms0 = t0.tv_sec * 1000000 + t0.tv_usec;
     ms1 = t1.tv_sec * 1000000 + t1.tv_usec;
-    while (ms1 - ms0 < usec){
+    while (g_state.loop && ms1 - ms0 < usec){
         gettimeofday(&t1, NULL);
-        
         ms1 = t1.tv_sec * 1000000 + t1.tv_usec;
-        }
+    }
 }

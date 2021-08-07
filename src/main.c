@@ -37,9 +37,10 @@ static void parse_options(int argc, char *argv[])
 static void init_state()
 {
 	ft_bzero(&g_state, sizeof(g_state));
+	g_state.time = NULL;
 	g_state.s_opt = PING_SZ;
-	g_state.loop = 1;
 	g_state.ttl = 37;
+	g_state.loop = 1;
 }
 
 static void sighandler()
@@ -102,6 +103,11 @@ t_state g_state;
 
 int main(int argc, char *argv[])
 {
+	// double data[] ={9,9,9,9,9,10};
+
+	// printf("%f\n%f\n", ft_pow(2,3), ft_pow(2,1));
+	// printf("%f\n%f\n", ft_pow(1,9), ft_pow(0,6));
+	// printf("mean: %f\n", ft_mean(data, 6));
 	init_state();
 	parse_options(argc, argv);
 	signal(SIGINT, sighandler);

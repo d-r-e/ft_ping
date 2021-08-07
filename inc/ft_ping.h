@@ -16,6 +16,12 @@
 # define BIN "ft_ping"
 # define PING_SZ 64
 # define DEFAULT_TIMEOUT 1
+
+typedef struct s_lst {
+    double ms;
+    struct s_lst * next;
+} t_lst;
+
 struct s_state {
 // command options
 	int			v_opt;
@@ -32,6 +38,7 @@ struct s_state {
 	unsigned int	p_transmitted;
 	unsigned int	p_received;
 	struct addrinfo *addr_list;
+	t_lst		*time;
 };
 
 struct ping_pkt {
@@ -47,6 +54,12 @@ int			ft_ping(void);
 void		print_stats(void);
 void		ft_exit(int status);
 
+/*
+ * MATHUTILS
+*/
+double	ft_pow(double base, double exp);
+double	ft_mean(double data[], int n);
+double	ft_variance(double data[], int n);
 
 void ft_sleep( long long sec);
 void ft_usleep( long long usec);
