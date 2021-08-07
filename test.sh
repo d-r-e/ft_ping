@@ -1,6 +1,7 @@
 #!/bin/bash
 BIN=ft_ping
  make
+set -e
 
 ./$BIN -c 1 google.es
 ./$BIN -c 1 8.8.8.8
@@ -8,7 +9,7 @@ BIN=ft_ping
 ./$BIN -c 1 192.168.1.1
 ./$BIN -c 1 -v elpais.com
 
-exit
+exit 0
 
 /*
  * Old tests (without root) (not mandatory)
