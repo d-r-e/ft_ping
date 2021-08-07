@@ -77,14 +77,13 @@ static int get_socket()
         printf("%s: error: no socket\n", BIN);
         return (-1);
     }
-	if (setsockopt(g_state.sockfd, SOL_IP, IP_TTL, 
+	if (setsockopt(g_state.sockfd, SOL_IP, (IP_TTL), 
                &timeout, sizeof(timeout)) != 0)
     {
         printf("%s: \nSetting socket options \
                  to sending TTL failed!\n", BIN);
         return (-1);
     } 
-    // setting timeout of recv setting
     if (setsockopt(g_state.sockfd, SOL_SOCKET, SO_RCVTIMEO,
                    (const void*)&timeout, sizeof timeout) != 0)
 	{
