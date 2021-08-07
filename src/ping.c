@@ -1,11 +1,11 @@
 #include "../inc/ft_ping.h"
 
-// static unsigned char checksum (unsigned char *ptr, size_t len) {
-//     unsigned char chk = 0;
-//     while (len--)
-//         chk -= *ptr++;
-//     return chk;
-// }
+static unsigned char checksum (unsigned char *ptr, size_t len) {
+    unsigned char chk = 0;
+    while (len--)
+        chk -= *ptr++;
+    return chk;
+}
 
 static void build_ping_packet(struct ping_pkt pckt)
 {
@@ -21,7 +21,9 @@ static void build_ping_packet(struct ping_pkt pckt)
     //printf("%.56s\n", pckt.msg);
     pckt.msg[i] = 0;
     pckt.hdr.un.echo.sequence = msg_count++;
-    //pckt.hdr.checksum = checksum((unsigned char*)&pckt, sizeof(pckt));
+    pckt.hdr.checksum = 0;
+    int nada =checksum((unsigned char*)&pckt.hdr, sizeof(pckt.hdr));
+    printf("checksum %d\n", nada);
 }
 
 
