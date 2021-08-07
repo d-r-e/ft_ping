@@ -34,7 +34,7 @@ int ft_ping()
     ssize_t err;
     struct ping_pkt pckt = {};
     socklen_t addr_len;
-    t_lst *time;
+
 
     ft_bzero(&pckt, sizeof(pckt));
     build_ping_packet(pckt);
@@ -59,14 +59,8 @@ int ft_ping()
     }
     gettimeofday(&t, NULL);
     g_state.p_received++;
-    time = g_state.time;
-    while (time && time->next)
-        time = time->next;
-    time = malloc(sizeof(t_lst));
-    time->next = NULL;
-    time->ms = elapsed(t,t0);
     printf("%d bytes from %s: icmp_seq=%u ttl=%d time=%.3f ms\n", \
-        PING_SZ, g_state.host, g_state.p_transmitted - 1, g_state.ttl, time->ms);
+        PING_SZ, g_state.host, g_state.p_transmitted - 1, g_state.ttl, elapsed(t,t0));
 
 	return(0);
 }
