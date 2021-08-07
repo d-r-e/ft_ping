@@ -5,7 +5,7 @@ RUN apt-get upgrade -y
 RUN apt-get install -y vim gcc make watch git man
 RUN apt-get install -y valgrind
 RUN apt-get install -y inetutils-ping libcap2-bin
-RUN useradd -p $MACHINE darodrig
+RUN useradd darodrig
 RUN usermod -aG sudo darodrig
 WORKDIR /ft_ping
 ENV MACHINE "$(uname -n)"
