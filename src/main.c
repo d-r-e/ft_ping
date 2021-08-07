@@ -69,8 +69,8 @@ static int get_socket()
 {
 	struct timeval timeout;
 
-	timeout.tv_sec = 0;
-    timeout.tv_usec = 37000;
+	timeout.tv_sec = 1;
+    timeout.tv_usec = 0;
 	g_state.sockfd = socket(AF_INET, SOCK_RAW, IPPROTO_ICMP);
     if (g_state.sockfd < 0)
     {
