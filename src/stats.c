@@ -53,4 +53,6 @@ void print_stats()
     printf("%d packets transmitted, %d packets received, %0.0f%% packet loss\n", \
         g_state.p_transmitted, g_state.p_received, \
         percent);
+    if (g_state.p_transmitted > 0)
+        printf("round-trip min/avg/max = %.3f/%.3f/%.3f ms\n", g_state.min, g_state.avg, g_state.max);
 }

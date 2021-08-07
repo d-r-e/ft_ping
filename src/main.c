@@ -86,6 +86,9 @@ static int main_loop(){
 	do
 	{
 		ft_ping();
+		if (!g_state.o_opt)
+		    ft_sleep(1);
+
 	} while (!g_state.o_opt && g_state.loop == 1);
     close(g_state.sockfd);
 	print_stats();

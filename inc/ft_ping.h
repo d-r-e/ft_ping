@@ -39,6 +39,11 @@ struct s_state {
 	unsigned int	p_received;
 	struct addrinfo *addr_list;
 	t_lst		*time;
+// stats
+	double		min;
+	double		max;
+	double		avg;
+	double		sum;
 };
 
 struct ping_pkt {

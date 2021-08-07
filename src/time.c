@@ -2,8 +2,15 @@
 
 float elapsed(struct timeval a, struct timeval b)
 {
-    return (((float)(a.tv_usec - b.tv_usec) / 1000) +
-        ((float)(a.tv_sec - b.tv_sec)) * 1000);
+    double t0 = a.tv_usec + a.tv_sec * 1000000;
+    double t1 = b.tv_usec + b.tv_sec * 1000000;
+    //printf("%f\n", t1 - t0);
+    double time = (t0-t1) / 1000;
+    g_state.sum += time;
+    g_state.avg = g_state.sum / g_state.p_received;
+    g_state.min = g_state.min != 0 && time > g_state.min ? g_state.min : time;
+    g_state.max = time >= g_state.max ? time : g_state.max;
+    return (time);
 }
 
 void ft_sleep(long long sec)

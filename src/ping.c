@@ -38,7 +38,6 @@ int ft_ping()
 
     ft_bzero(&pckt, sizeof(pckt));
     build_ping_packet(pckt);
-    ft_sleep(1);
     if (!g_state.loop)
         return(0);
     gettimeofday(&t0, NULL);
@@ -53,12 +52,12 @@ int ft_ping()
     addr_len = sizeof(r_addr);
     err = recvfrom(g_state.sockfd, &pckt, 0, sizeof(pckt), (struct sockaddr*)&r_addr, &addr_len);
     //err = recvfrom(g_state.sockfd, (void*)&pckt, sizeof(pckt), 0, (struct sockaddr*)&r_addr, &addr_len);
-    gettimeofday(&t, NULL);
     if (err == -1)
     {
         printf("%s: error: recvfrom failed\n", BIN);
         return (-1);
     }
+    gettimeofday(&t, NULL);
     g_state.p_received++;
     time = g_state.time;
     while (time && time->next)
