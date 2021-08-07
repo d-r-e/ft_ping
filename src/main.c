@@ -81,7 +81,7 @@ static int get_socket()
                &timeout, sizeof(timeout)) != 0)
     {
         printf("%s: \nSetting socket options \
-                 to TTL failed!\n", BIN);
+                 to sending TTL failed!\n", BIN);
         return (-1);
     } 
     // setting timeout of recv setting
@@ -89,7 +89,7 @@ static int get_socket()
                    (const void*)&timeout, sizeof timeout) != 0)
 	{
 			printf("%s: \nSetting socket options \
-                 to TTL failed!\n", BIN);
+                 to recvfrom TTL failed!\n", BIN);
 		return (-1);
 	}
 	return (g_state.sockfd);
