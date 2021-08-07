@@ -11,6 +11,7 @@
 # include <netinet/ip_icmp.h>
 # include <sys/types.h>
 # include <netdb.h>
+# include <limits.h>
 # include "../libft/libft.h"
 
 # define BIN "ft_ping"

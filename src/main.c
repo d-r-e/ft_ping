@@ -108,6 +108,8 @@ static int main_loop(){
 		return (-1);
 	do
 	{
+		if (g_state.c_opt == INT32_MIN)
+			g_state.c_opt = -1;
 		ft_ping();
 		--g_state.c_opt;
 		if (g_state.c_opt)
