@@ -89,7 +89,7 @@ int ft_ping()
         return (-1);
     }
     g_state.p_transmitted++;
-    // usleep(100000);
+    usleep(1000);
     read = recvmsg(g_state.sockfd, &(rply.msghdr), 0);
     //read = recvfrom(g_state.sockfd, (void*)&pckt, sizeof(pckt), 0, (struct sockaddr*)&r_addr, &addr_len);
     if (read < 1)
