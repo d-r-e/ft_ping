@@ -48,7 +48,7 @@ struct s_state {
 };
 
 struct ping_pkt {
-	struct icmphdr hdr;
+	struct icmphdr icmphdr;
 	char msg[PING_SZ - sizeof(struct icmphdr)];
 };
 

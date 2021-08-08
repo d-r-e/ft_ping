@@ -68,6 +68,7 @@ static void sighandler()
 
 static int get_socket()
 {
+	struct timeval timeout = {1,0};
 
 	g_state.sockfd = socket(AF_INET, SOCK_RAW, IPPROTO_ICMP);
     if (g_state.sockfd < 0)
@@ -75,22 +76,10 @@ static int get_socket()
         printf("%s: error: no socket\n", BIN);
         return (-1);
     }
-	if (setsockopt(g_state.sockfd, SOL_IP, (IP_TTL), 
-               &(g_state.ttl), sizeof(g_state.ttl)) != 0)
-    {
-        printf("%s: \nError setting sendto TTL!\n", BIN);
-        return (-1);
-    } 
-	int ttl = g_state.ttl;
-	if (setsockopt(g_state.sockfd, IPPROTO_ICMP, IP_TTL, &ttl, sizeof(ttl)))
-		return(printf("%s: error setting ttl\n", BIN));
-	struct timeval timeout = {1,0};
-    if (setsockopt(g_state.sockfd, SOL_SOCKET, SO_RCVTIMEO,
-                   (const void*)&timeout, sizeof timeout) != 0)
-	{
-			printf("%s: \nSetting socket options to recvfrom TTL failed!\n", BIN);
-		return (-1);
-	}
+	if ((setsockopt(g_state.sockfd, IPPROTO_IP, IP_TTL, &(g_state.ttl), sizeof(g_state.ttl))) == -1)
+		return(-1);
+	if ((setsockopt(g_state.sockfd, SOL_SOCKET, SO_RCVTIMEO, (const void *)&timeout, sizeof(timeout))) == -1)
+		return(-1);
 	return (g_state.sockfd);
 }
 
