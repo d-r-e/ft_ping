@@ -75,7 +75,7 @@ int ft_ping()
     struct timeval t = {0,0};
     ssize_t read;
     struct ping_pkt pckt = {};
-    t_reply rply;
+    t_reply rply = {};
 
     ft_bzero(&pckt, sizeof(pckt));
     if (!g_state.loop)
@@ -90,6 +90,7 @@ int ft_ping()
     }
     g_state.p_transmitted++;
     //usleep(10000);
+    ft_bzero(&rply, sizeof (rply));
     rply.received_bytes = recvmsg(g_state.sockfd, &(rply.msghdr), 0);
     //read = recvfrom(g_state.sockfd, (void*)&pckt, sizeof(pckt), 0, (struct sockaddr*)&r_addr, &addr_len);
     if (rply.received_bytes < 0)
