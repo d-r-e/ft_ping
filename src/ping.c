@@ -92,7 +92,6 @@ int ft_ping()
     //usleep(10000);
     ft_bzero(&rply, sizeof (rply));
     rply.received_bytes = recvmsg(g_state.sockfd, &(rply.msghdr), 0);
-    //read = recvfrom(g_state.sockfd, (void*)&pckt, sizeof(pckt), 0, (struct sockaddr*)&r_addr, &addr_len);
     if (rply.received_bytes < 0)
     {
         printf("%s: reador: recvfrom failed\n", BIN);
