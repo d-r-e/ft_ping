@@ -52,6 +52,16 @@ struct ping_pkt {
 	char msg[PING_SZ - sizeof(struct icmphdr)];
 };
 
+typedef struct				s_reply
+{
+	int						received_bytes;
+	struct msghdr			msghdr;
+	struct iovec			iov;
+	struct icmp				*icmp;
+	char					receive_buffer[84];
+	char					control[24];
+}							t_reply;
+
 typedef struct s_state t_state;
 
 const char	*ft_gethostbyname(const char *name);

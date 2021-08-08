@@ -73,11 +73,9 @@ int ft_ping()
 {
     struct timeval t0 = {0,0};
     struct timeval t = {0,0};
-    struct sockaddr_in r_addr;
     ssize_t err;
     struct ping_pkt pckt = {};
-    socklen_t addr_len;
-
+    t_reply rply;
 
     ft_bzero(&pckt, sizeof(pckt));
     if (!g_state.loop)
@@ -92,8 +90,7 @@ int ft_ping()
     }
     g_state.p_transmitted++;
     // usleep(100000);
-    addr_len = sizeof(r_addr);
-    err = recvfrom(g_state.sockfd, &pckt, 0, sizeof(pckt), (struct sockaddr*)&r_addr, &addr_len);
+    err = recvmsg(g_state.sockfd, &(rply.msghdr), 0);
     //err = recvfrom(g_state.sockfd, (void*)&pckt, sizeof(pckt), 0, (struct sockaddr*)&r_addr, &addr_len);
     if (err == -1)
     {
