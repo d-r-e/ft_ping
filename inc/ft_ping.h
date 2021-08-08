@@ -23,6 +23,9 @@ typedef struct s_lst {
     struct s_lst * next;
 } t_lst;
 
+# define SWAP16(x)			((__uint16_t) ((((x) >> 8) & 0xff) | (((x) & 0xff) << 8)))
+# define SWAP32(x)			((((x) & 0xff000000u) >> 24) | (((x) & 0x00ff0000u) >> 8) | (((x) & 0x0000ff00u) << 8) | (((x) & 0x000000ffu) << 24))
+#define ABS(x)				( ( (x) < 0) ? -(x) : (x) )
 struct s_state {
 // command options
 	int			v_opt;
@@ -44,6 +47,8 @@ struct s_state {
 	double		min;
 	double		max;
 	double		avg;
+	double		msum;
+	double		mdev;
 	double		sum;
 };
 

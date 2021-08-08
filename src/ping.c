@@ -16,7 +16,7 @@ checksum(uint16_t *addr, int len)
 	w = addr;
 
 	/*
-	 * Our algorithm is simple, using a 32 bit accumulator (sum), we add
+	 * The algorithm is simple, using a 32 bit accumulator (sum), we add
 	 * sequential 16 bit words to it, and at the end, fold back all the
 	 * carry bits from the top 16 bits into the lower 16 bits.
 	 */
@@ -25,7 +25,7 @@ checksum(uint16_t *addr, int len)
 		nleft -= 2;
 	}
 
-	/* mop up an odd byte, if necessary */
+	/* append an odd byte for padding, if necessary */
 	if (nleft == 1) {
 		last.uc[0] = *(u_char *)w;
 		last.uc[1] = 0;
@@ -35,7 +35,7 @@ checksum(uint16_t *addr, int len)
 	/* add back carry outs from top 16 bits to low 16 bits */
 	sum = (sum >> 16) + (sum & 0xffff);	/* add hi 16 to low 16 */
 	sum += (sum >> 16);			/* add carry */
-	answer = ~sum;				/* truncate to 16 bits */
+	answer = ~sum;				/* magic trick: truncate to 16 bits */
 	return(answer);
 }
 
@@ -46,7 +46,7 @@ static void build_ping_packet(struct ping_pkt *packet, struct timeval current_ti
 	ft_bzero(packet, sizeof(packet));
 	packet->icmphdr.type = ICMP_ECHO;
 	packet->icmphdr.code = 0;
-	packet->icmphdr.un.echo.sequence = (msg_count>>8) | (msg_count<<8);
+	packet->icmphdr.un.echo.sequence = SWAP16(msg_count);
 	packet->icmphdr.un.echo.id = (getpid()>>8) | (getpid()<<8);
     msg_count++;
     (void)current_time;

@@ -1,5 +1,6 @@
 #include "../inc/ft_ping.h"
 
+
 double ft_pow(double base, double exp)
 {
     long double n;
@@ -54,5 +55,5 @@ void print_stats()
         g_state.p_transmitted, g_state.p_received, \
         percent);
     if (g_state.p_transmitted > 0)
-        printf("round-trip min/avg/max = %.3f/%.3f/%.3f ms\n", g_state.min, g_state.avg, g_state.max);
+        printf("round-trip min/avg/max/stddev = %.3f/%.3f/%.3f/%.3f ms\n", g_state.min, g_state.avg, g_state.max, g_state.mdev);
 }
