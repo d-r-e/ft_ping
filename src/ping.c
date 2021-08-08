@@ -35,7 +35,7 @@ checksum(uint16_t *addr, int len)
 	/* add back carry outs from top 16 bits to low 16 bits */
 	sum = (sum >> 16) + (sum & 0xffff);	/* add hi 16 to low 16 */
 	sum += (sum >> 16);			/* add carry */
-	answer = ~sum;				/* magic trick: truncate to 16 bits */
+	answer = ~sum;				/* 1st compliment && truncate to 16 bits */
 	return(answer);
 }
 
@@ -89,18 +89,18 @@ int ft_ping()
         return (-1);
     }
     g_state.p_transmitted++;
-    usleep(1000);
-    read = recvmsg(g_state.sockfd, &(rply.msghdr), 0);
+    //usleep(10000);
+    rply.received_bytes = recvmsg(g_state.sockfd, &(rply.msghdr), 0);
     //read = recvfrom(g_state.sockfd, (void*)&pckt, sizeof(pckt), 0, (struct sockaddr*)&r_addr, &addr_len);
-    if (read < 1)
+    if (rply.received_bytes < 0)
     {
         printf("%s: reador: recvfrom failed\n", BIN);
         return (-1);
     }
     gettimeofday(&t, NULL);
     g_state.p_received++;
-    printf("%lu bytes from %s: icmp_seq=%u ttl=%d time=%.3f ms\n", \
-        read, g_state.host, SWAP16(pckt.icmphdr.un.echo.sequence), g_state.ttl, elapsed(t,t0));
+    printf("%u bytes from %s: icmp_seq=%u ttl=%d time=%.3f ms\n", \
+        rply.received_bytes, g_state.host, SWAP16(pckt.icmphdr.un.echo.sequence), g_state.ttl, elapsed(t,t0));
 
 	return(0);
 }
