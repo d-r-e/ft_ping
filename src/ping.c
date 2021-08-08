@@ -64,7 +64,7 @@ static void build_ping_packet(struct ping_pkt *packet, struct timeval current_ti
     // pckt.hdr.un.echo.sequence = msg_count++;
     // pckt.hdr.checksum = checksum( (uint16_t*)&pckt, sizeof(pckt) );
     // int nada =checksum((unsigned char*)&pckt.hdr, sizeof(pckt.hdr));
-    printf("checksum %d\n", packet->icmphdr.checksum);
+    //printf("checksum %d\n", packet->icmphdr.checksum);
 }
 
 
