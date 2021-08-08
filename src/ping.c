@@ -73,7 +73,7 @@ int ft_ping()
 {
     struct timeval t0 = {0,0};
     struct timeval t = {0,0};
-    ssize_t err;
+    ssize_t read;
     struct ping_pkt pckt = {};
     t_reply rply;
 
@@ -82,25 +82,25 @@ int ft_ping()
         return(0);
     gettimeofday(&t0, NULL);
     build_ping_packet(&pckt, t0);
-    err = sendto(g_state.sockfd, (void*)&pckt, sizeof(pckt), 0, (struct sockaddr *)g_state.addr_list->ai_addr, sizeof(*g_state.addr_list->ai_addr));
-    if (err == -1)
+    read = sendto(g_state.sockfd, (void*)&pckt, sizeof(pckt), 0, (struct sockaddr *)g_state.addr_list->ai_addr, sizeof(*g_state.addr_list->ai_addr));
+    if (read < 1)
     {
-        printf("%s: error: sendto failed\n", BIN);
+        printf("%s: reador: sendto failed\n", BIN);
         return (-1);
     }
     g_state.p_transmitted++;
     // usleep(100000);
-    err = recvmsg(g_state.sockfd, &(rply.msghdr), 0);
-    //err = recvfrom(g_state.sockfd, (void*)&pckt, sizeof(pckt), 0, (struct sockaddr*)&r_addr, &addr_len);
-    if (err == -1)
+    read = recvmsg(g_state.sockfd, &(rply.msghdr), 0);
+    //read = recvfrom(g_state.sockfd, (void*)&pckt, sizeof(pckt), 0, (struct sockaddr*)&r_addr, &addr_len);
+    if (read < 1)
     {
-        printf("%s: error: recvfrom failed\n", BIN);
+        printf("%s: reador: recvfrom failed\n", BIN);
         return (-1);
     }
     gettimeofday(&t, NULL);
     g_state.p_received++;
-    printf("%d bytes from %s: icmp_seq=%u ttl=%d time=%.3f ms\n", \
-        PING_SZ, g_state.host, g_state.p_transmitted - 1, g_state.ttl, elapsed(t,t0));
+    printf("%lu bytes from %s: icmp_seq=%u ttl=%d time=%.3f ms\n", \
+        read, g_state.host, SWAP16(pckt.icmphdr.un.echo.sequence), g_state.ttl, elapsed(t,t0));
 
 	return(0);
 }
