@@ -104,6 +104,6 @@ int ft_ping()
     gettimeofday(&t, NULL);
     g_state.p_received++;
     printf("%u bytes from %s: icmp_seq=%u ttl=%d time=%.3f ms\n", \
-        rply.received_bytes, g_state.host, SWAP16(pckt.icmphdr.un.echo.sequence), g_state.ttl, elapsed(t,t0));
+        rply.received_bytes - 12, g_state.host, SWAP16(pckt.icmphdr.un.echo.sequence), g_state.ttl, elapsed(t,t0));
 	return(0);
 }
