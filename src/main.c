@@ -68,7 +68,7 @@ static void sighandler(int c)
 	}
 	else if (c == SIGALRM)
 	{
-		g_state.sleep = 0;
+		g_state.sleep = 1;
 		printf("ding)");
 	}
 }

@@ -15,9 +15,10 @@
 # include "../libft/libft.h"
 #include <errno.h>
 # define BIN "ft_ping"
-# define PING_SZ 64
+# define PING_SZ 56
 # define DEFAULT_TIMEOUT 1
 # define DEFAULT_TTL 37
+
 typedef struct s_lst {
     double ms;
     struct s_lst * next;
