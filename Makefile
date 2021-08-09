@@ -27,7 +27,10 @@ re: fclean all
 all: $(NAME)
 
 x: $(NAME)
-	@./$(NAME) -o "8.8.8.8"
+	@./$(NAME) -c 1 localhost
+
+g: $(NAME)
+	@./$(NAME) -c 1 google.com
 
 commit: all test fclean 
 	@git add $(SRC) Makefile $(INC) .gitignore test.sh Dockerfile start_env.sh

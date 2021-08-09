@@ -2,7 +2,7 @@
 
 static void usage()
 {
-	dprintf(STDERR_FILENO, "usage: ft_ping [-hv] host\n");
+	dprintf(2, "usage: ft_ping [-hv] host\n");
 	exit(64);
 }
 
@@ -105,7 +105,7 @@ static int main_loop(){
 			g_state.c_opt = -1;
 		ft_ping();
 		--g_state.c_opt;
-		if (g_state.c_opt)
+		if (g_state.c_opt && !g_state.f_opt)
 		    ft_sleep(1);
 
 	} while (g_state.c_opt && g_state.loop == 1);
