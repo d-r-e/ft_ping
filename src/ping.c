@@ -39,6 +39,17 @@ checksum(uint16_t *addr, int len)
 	return(answer);
 }
 
+static void init_reply(t_reply *rply)
+{
+    rply->msghdr.msg_name = NULL;
+	rply->msghdr.msg_iov = &rply->iov;
+	rply->iov.iov_base = rply->receive_buffer;
+	rply->iov.iov_len = sizeof(rply->receive_buffer);
+	rply->msghdr.msg_iovlen = 1;
+	rply->msghdr.msg_control = &rply->control;
+	rply->msghdr.msg_controllen = sizeof(rply->control);
+}
+
 static void build_ping_packet(struct ping_pkt *packet, struct timeval current_time)
 {
     static int msg_count = 0;
@@ -50,24 +61,9 @@ static void build_ping_packet(struct ping_pkt *packet, struct timeval current_ti
 	packet->icmphdr.un.echo.id = (getpid()>>8) | (getpid()<<8);
     msg_count++;
     (void)current_time;
-	//ft_memcpy(&packet->icmphdr.un.echo.sequence, &(current_time.tv_sec), sizeof(current_time.tv_sec));
+	ft_memcpy(&packet->msg, &(current_time.tv_sec), sizeof(current_time.tv_sec));
 	packet->icmphdr.checksum = checksum((uint16_t*)packet, sizeof(*packet));
-
-    // ft_bzero(&pckt, sizeof(pckt));
-    // pckt.hdr.type = ICMP_ECHO; // 8
-    // pckt.hdr.un.echo.id = getpid();
-        
-    // for (i = 0; i < sizeof(pckt.msg)-1; i++ )
-    //     pckt.msg[i] = i + '0';
-    // //printf("%.56s\n", pckt.msg);
-    // pckt.msg[i] = 0;
-    // pckt.hdr.un.echo.sequence = msg_count++;
-    // pckt.hdr.checksum = checksum( (uint16_t*)&pckt, sizeof(pckt) );
-    // int nada =checksum((unsigned char*)&pckt.hdr, sizeof(pckt.hdr));
-    //printf("checksum %d\n", packet->icmphdr.checksum);
 }
-
-
 
 int ft_ping()
 {
@@ -83,20 +79,28 @@ int ft_ping()
     gettimeofday(&t0, NULL);
     build_ping_packet(&pckt, t0);
     read = sendto(g_state.sockfd, (void*)&pckt, sizeof(pckt), 0, (struct sockaddr *)g_state.addr_list->ai_addr, sizeof(*g_state.addr_list->ai_addr));
-    if (read < 1)
+    if (read <= 0)
     {
-        printf("%s: reador: sendto failed\n", BIN);
+        printf("%s: error: sendto failed\n", BIN);
         return (-1);
     }
     g_state.p_transmitted++;
-    //usleep(10000);
     ft_bzero(&rply, sizeof (rply));
+    // while (!rply.received_bytes)
+    init_reply(&rply);
     rply.received_bytes = recvmsg(g_state.sockfd, &(rply.msghdr), 0);
     if (rply.received_bytes < 0)
     {
-        printf("%s: reador: recvfrom failed\n", BIN);
+        printf("%s: error: recvfrom failed\n", BIN);
         return (-1);
     }
+    if (rply.received_bytes == 0)
+    {
+        printf("%s: error: socket closed\n\n", BIN);
+        g_state.loop = 0;
+        return (-1);
+    }
+    //strerror(errno);
     gettimeofday(&t, NULL);
     g_state.p_received++;
     printf("%u bytes from %s: icmp_seq=%u ttl=%d time=%.3f ms\n", \

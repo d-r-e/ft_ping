@@ -60,10 +60,17 @@ static void init_state()
 	g_state.loop = 1;
 }
 
-static void sighandler()
+static void sighandler(int c)
 {
-	g_state.loop = 0;
-	printf("\r");
+	if (c == SIGINT){
+		g_state.loop = 0;
+		printf("\r");
+	}
+	else if (c == SIGALRM)
+	{
+		g_state.sleep = 0;
+		printf("ding)");
+	}
 }
 
 static int get_socket()

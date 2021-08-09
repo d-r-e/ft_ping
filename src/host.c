@@ -8,7 +8,7 @@ int imroot()
 const char *ft_gethostbyname(const char *name)
 {
     struct addrinfo hints = {0};
-    int error;
+    int             error;
 
     hints.ai_flags = 0;
     hints.ai_family = AF_INET;

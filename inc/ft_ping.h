@@ -13,7 +13,7 @@
 # include <netdb.h>
 # include <limits.h>
 # include "../libft/libft.h"
-
+#include <errno.h>
 # define BIN "ft_ping"
 # define PING_SZ 64
 # define DEFAULT_TIMEOUT 1
@@ -34,6 +34,7 @@ struct s_state {
 	int			f_opt;
 	long int	s_opt;
 	int			loop;
+	int			sleep;
 // tcp-ip - icmp
 	char		*hostname;
 	char		*host;
