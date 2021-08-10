@@ -73,6 +73,7 @@ int ft_ping()
     struct ping_pkt pckt = {};
     t_reply rply = {};
 
+
     ft_bzero(&pckt, sizeof(pckt));
     if (!g_state.loop)
         return(0);
@@ -104,8 +105,8 @@ int ft_ping()
         return (-1);
     }
     gettimeofday(&t, NULL);
-    printf("%.*s\n", (int)rply.iov.iov_len, (const char*)rply.iov.iov_base);
-    printf("%.*s\n", 24, (const char*)rply.control);
+    // printf("%.*s\n", (int)rply.iov.iov_len, (const char*)rply.iov.iov_base);
+    // printf("%.*s\n", 24, (const char*)rply.control);
 	g_state.p_received++;
 	
 	if (!g_state.f_opt){
