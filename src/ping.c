@@ -94,7 +94,7 @@ int ft_ping()
 	rply.received_bytes = recvmsg(g_state.sockfd, &(rply.msghdr), 0);
     if (rply.received_bytes < 0)
     {
-        printf("%s: error: recvfrom failed\n", BIN);
+        // printf("%s: error: recvfrom failed\n", BIN);
         return (-1);
     }
     if (rply.received_bytes < PING_SZ)
@@ -103,9 +103,11 @@ int ft_ping()
         g_state.loop = 0;
         return (-1);
     }
-    //strerror(errno);
     gettimeofday(&t, NULL);
-    g_state.p_received++;
+    printf("%.*s\n", (int)rply.iov.iov_len, (const char*)rply.iov.iov_base);
+    printf("%.*s\n", 24, (const char*)rply.control);
+	g_state.p_received++;
+	
 	if (!g_state.f_opt){
     	printf("%u bytes from %s: icmp_seq=%u ttl=%d time=%.3f ms\n", \
         	rply.received_bytes - 12, g_state.host, SWAP16(pckt.icmphdr.un.echo.sequence), g_state.ttl, elapsed(t,t0));
