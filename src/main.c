@@ -13,7 +13,7 @@ static void parse_options(int argc, char *argv[])
 	{
 		if (ft_strlen(argv[i]) > 1 && !ft_strncmp(argv[i], "-v", 3))
 			g_state.v_opt = 1;
-		else if (!ft_strncmp(argv[i], "-c", ft_strlen("-c") + 1) )
+		else if (!ft_strncmp(argv[i], "-c", ft_strlen("-c") + 1))
 		{
 			if (i + 1 < argc)
 				g_state.c_opt = ft_atoi(argv[++i]);
@@ -22,7 +22,7 @@ static void parse_options(int argc, char *argv[])
 			if (g_state.c_opt <= 0)
 				usage();
 		}
-		else if (!ft_strncmp(argv[i], "-i", ft_strlen("-i") + 1) )
+		else if (!ft_strncmp(argv[i], "-i", ft_strlen("-i") + 1))
 		{
 			if (i + 1 < argc)
 				g_state.i_opt = ft_atoi(argv[++i]);
@@ -31,7 +31,7 @@ static void parse_options(int argc, char *argv[])
 			if (g_state.i_opt < 0)
 				usage();
 		}
-		else if (!ft_strncmp(argv[i], "--ttl", ft_strlen("--ttl") + 1) )
+		else if (!ft_strncmp(argv[i], "--ttl", ft_strlen("--ttl") + 1))
 		{
 			if (i + 1 < argc)
 				g_state.ttl = ft_atoi(argv[++i]);
@@ -45,15 +45,16 @@ static void parse_options(int argc, char *argv[])
 			if (getuid())
 			{
 				printf("%s: -f flag: Operation not permitted\n", BIN);
-				exit (77);
+				exit(77);
 			}
 			g_state.f_opt = 1;
-		} else if (ft_strlen(argv[i]) > 1 && !ft_strncmp(argv[i], "-h", 3))
+		}
+		else if (ft_strlen(argv[i]) > 1 && !ft_strncmp(argv[i], "-h", 3))
 			g_state.h_opt = 1;
 		else if (ft_strlen(argv[i]) && argv[i][0] == '-')
 			usage();
 		else if (ft_strlen(argv[i]) && (argv[i][0]) != '-')
-			g_state.hostname=argv[i];
+			g_state.hostname = argv[i];
 	}
 	if (!g_state.hostname)
 		usage();
@@ -72,7 +73,8 @@ static void init_state()
 
 static void sighandler(int c)
 {
-	if (c == SIGINT){
+	if (c == SIGINT)
+	{
 		g_state.loop = 0;
 		printf("\r");
 	}
@@ -85,28 +87,28 @@ static void sighandler(int c)
 
 static int get_socket()
 {
-	struct timeval timeout = { 1, 0 };
+	struct timeval timeout = {1, 0};
 
 	g_state.sockfd = socket(AF_INET, SOCK_RAW, IPPROTO_ICMP);
-    if (g_state.sockfd < 0)
-    {
-        printf("%s: error: no socket\n", BIN);
-        return (-1);
-    }
+	if (g_state.sockfd < 0)
+	{
+		printf("%s: error: no socket\n", BIN);
+		return (-1);
+	}
 	if ((setsockopt(g_state.sockfd, IPPROTO_IP, IP_TTL, &(g_state.ttl), sizeof(g_state.ttl))) == -1)
-		return(-1);
+		return (-1);
 	if ((setsockopt(g_state.sockfd, SOL_SOCKET, SO_RCVTIMEO, (const void *)&timeout, sizeof(timeout))) == -1)
-		return(-1);
+		return (-1);
 	return (g_state.sockfd);
 }
 
-static int main_loop(){
-	printf("%s: %s (%s): %ld(%ld) data bytes\n", "PING", \
-		g_state.hostname, \
-		(ft_strlen(g_state.host) != 0) ? g_state.host : g_state.hostname, \
-		g_state.s_opt, \
-		g_state.s_opt + sizeof(struct icmphdr) \
-	);
+static int main_loop()
+{
+	printf("%s: %s (%s): %ld(%ld) data bytes\n", "PING",
+		   g_state.hostname,
+		   (ft_strlen(g_state.host) != 0) ? g_state.host : g_state.hostname,
+		   g_state.s_opt,
+		   g_state.s_opt + sizeof(struct icmphdr));
 	if (g_state.c_opt == 0 || get_socket() < 0)
 		return (-1);
 	do
@@ -115,13 +117,13 @@ static int main_loop(){
 			g_state.c_opt = -1;
 		ft_ping();
 		--g_state.c_opt;
-		 
+
 		if (g_state.c_opt && !g_state.f_opt)
-		    ft_sleep(g_state.i_opt);
+			ft_sleep(g_state.i_opt);
 	} while (g_state.c_opt && g_state.loop == 1);
-    close(g_state.sockfd);
+	close(g_state.sockfd);
 	print_stats();
-    return (0);
+	return (0);
 }
 
 void ft_exit(int status)
