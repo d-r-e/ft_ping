@@ -22,6 +22,15 @@ static void parse_options(int argc, char *argv[])
 			if (g_state.c_opt <= 0)
 				usage();
 		}
+		else if (!ft_strncmp(argv[i], "-i", ft_strlen("-i") + 1) )
+		{
+			if (i + 1 < argc)
+				g_state.i_opt = ft_atoi(argv[++i]);
+			else
+				usage();
+			if (g_state.i_opt < 0)
+				usage();
+		}
 		else if (!ft_strncmp(argv[i], "--ttl", ft_strlen("--ttl") + 1) )
 		{
 			if (i + 1 < argc)
@@ -58,6 +67,7 @@ static void init_state()
 	g_state.s_opt = PING_SZ;
 	g_state.ttl = 37;
 	g_state.loop = 1;
+	g_state.i_opt = 1;
 }
 
 static void sighandler(int c)
@@ -105,9 +115,9 @@ static int main_loop(){
 			g_state.c_opt = -1;
 		ft_ping();
 		--g_state.c_opt;
+		 
 		if (g_state.c_opt && !g_state.f_opt)
-		    ft_sleep(1);
-
+		    ft_sleep(g_state.i_opt);
 	} while (g_state.c_opt && g_state.loop == 1);
     close(g_state.sockfd);
 	print_stats();

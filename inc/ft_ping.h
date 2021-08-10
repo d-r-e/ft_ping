@@ -17,6 +17,7 @@
 # define BIN "ft_ping"
 # define PING_SZ 56
 # define DEFAULT_TIMEOUT 1
+# define DEFAULT_INTERVAL 1 // SECONDS 
 # define DEFAULT_TTL 37
 typedef struct s_lst {
     double ms;
@@ -32,6 +33,7 @@ struct s_state {
 	int			h_opt;
 	int			c_opt;
 	int			f_opt;
+	int			i_opt;
 	long int	s_opt;
 	int			loop;
 	int			sleep;

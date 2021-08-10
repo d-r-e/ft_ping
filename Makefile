@@ -3,15 +3,15 @@ SRC=src/main.c src/host.c src/ping.c src/time.c src/stats.c
 OBJ = $(SRC:.c=.o)
 FLAGS= -O2 -Wall -Wextra -Werror -Wformat-security
 LIBFT=libft/libft.a
-INC=inc/ft_ping.h
+INC=inc/$(NAME).h
 
-$(NAME): $(INC) $(SRC) $(OBJ) $(LIBFT) 
+$(NAME): $(OBJ) $(LIBFT) 
 	gcc $(FLAGS) $(OBJ) -I libft -L libft -lft -o $(NAME)
 
 $(LIBFT):
 	$(MAKE) -C libft
 
-%.o: %.c
+%.o: %.c $(INC)
 	gcc $(FLAGS) -c -o $@ $<
 
 clean:

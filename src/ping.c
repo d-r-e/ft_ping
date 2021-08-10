@@ -88,9 +88,10 @@ int ft_ping()
     ft_bzero(&rply, sizeof (rply));
     // while (!rply.received_bytes)
     init_reply(&rply);
-	if (g_state.f_opt)
+	if (g_state.f_opt){
 		printf(".");
-    rply.received_bytes = recvmsg(g_state.sockfd, &(rply.msghdr), 0);
+	}
+	rply.received_bytes = recvmsg(g_state.sockfd, &(rply.msghdr), 0);
     if (rply.received_bytes < 0)
     {
         printf("%s: error: recvfrom failed\n", BIN);
@@ -105,10 +106,10 @@ int ft_ping()
     //strerror(errno);
     gettimeofday(&t, NULL);
     g_state.p_received++;
-	if (!g_state.f_opt)
+	if (!g_state.f_opt){
     	printf("%u bytes from %s: icmp_seq=%u ttl=%d time=%.3f ms\n", \
         	rply.received_bytes - 12, g_state.host, SWAP16(pckt.icmphdr.un.echo.sequence), g_state.ttl, elapsed(t,t0));
-	else
+	}else
 		printf("\b");
 	return(0);
 }
