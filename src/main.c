@@ -85,7 +85,7 @@ static void sighandler(int c)
 
 static int get_socket()
 {
-	struct timeval timeout = {1,0};
+	struct timeval timeout = { 1, 0 };
 
 	g_state.sockfd = socket(AF_INET, SOCK_RAW, IPPROTO_ICMP);
     if (g_state.sockfd < 0)

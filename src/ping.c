@@ -43,11 +43,12 @@ static void init_reply(t_reply *rply)
 {
     rply->msghdr.msg_name = NULL;
 	rply->msghdr.msg_iov = &rply->iov;
+	rply->msghdr.msg_iovlen = 1;
 	rply->iov.iov_base = rply->receive_buffer;
 	rply->iov.iov_len = sizeof(rply->receive_buffer);
-	rply->msghdr.msg_iovlen = 1;
 	rply->msghdr.msg_control = &rply->control;
 	rply->msghdr.msg_controllen = sizeof(rply->control);
+	rply->icmp = rply->iov.iov_base + sizeof(struct icmphdr);
 }
 
 static void build_ping_packet(struct ping_pkt *packet, struct timeval current_time)
@@ -60,7 +61,6 @@ static void build_ping_packet(struct ping_pkt *packet, struct timeval current_ti
 	packet->icmphdr.un.echo.sequence = SWAP16(msg_count);
 	packet->icmphdr.un.echo.id = (getpid()>>8) | (getpid()<<8);
     msg_count++;
-    (void)current_time;
 	ft_memcpy(&packet->msg, &(current_time.tv_sec), sizeof(current_time.tv_sec));
 	packet->icmphdr.checksum = checksum((uint16_t*)packet, sizeof(*packet));
 }
@@ -105,8 +105,13 @@ int ft_ping()
         return (-1);
     }
     gettimeofday(&t, NULL);
-    // printf("%.*s\n", (int)rply.iov.iov_len, (const char*)rply.iov.iov_base);
-    // printf("%.*s\n", 24, (const char*)rply.control);
+	// for (size_t i = 0; i < rply.msghdr.msg_iovlen; ++i)
+    // 	printf("%.*s\n", (int)rply.iov.iov_len, (const char*)rply.msghdr.msg_iov[i].iov_base);
+    // // printf("%.*s\n", 24, (const char*)rply.control);
+	printf("reply code %d\n", (unsigned char)((struct icmphdr *)(rply.receive_buffer + sizeof(struct icmphdr)))->code);
+	printf("reply type %d\n", (unsigned char)((struct icmphdr *)(rply.receive_buffer + sizeof(struct icmphdr)))->type);
+
+	
 	g_state.p_received++;
 	
 	if (!g_state.f_opt){

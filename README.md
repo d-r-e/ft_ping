@@ -6,4 +6,4 @@ Recode of the "ping" command to research into the field of TCP/IP protocols and 
 
 `tcpdump -vn icmp` can be used in parallel to a request.
 
-`tcpdump -v -n icmp -A` to see full bytes
+`tcpdump -v -n icmp -X` to see full bytes
