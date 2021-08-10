@@ -97,10 +97,8 @@ int ft_ping()
 	}
 	rply.received_bytes = recvmsg(g_state.sockfd, &(rply.msghdr), 0);
 	if (rply.received_bytes < 0)
-	{
-		// printf("%s: error: recvfrom failed\n", BIN);
 		return (-1);
-	}
+		// printf("%s: error: recvfrom failed\n", BIN);
 	if (rply.received_bytes < PING_SZ)
 	{
 		printf("%s: error: socket closed\n\n", BIN);
