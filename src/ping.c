@@ -42,8 +42,7 @@
 // 	return (answer);
 // }
 
-static
-unsigned short checksum(void *address, size_t len)
+static unsigned short checksum(void *address, size_t len)
 {
 	unsigned short	*src;
 	unsigned long	sum;
@@ -63,23 +62,6 @@ unsigned short checksum(void *address, size_t len)
 	return ((unsigned short)~sum);
 }
 
-// static void print_rply_hex(t_reply *rply)
-// {
-// 	int i;
-// 	unsigned int width = 10;
-
-// 	i = 0;
-// 	while (i < rply->received_bytes)
-// 	{
-// 		printf("%02x ", ((char*)rply->iov.iov_base)[i]);
-// 		if (i % width == width - 1)
-// 			printf("\n");
-// 		i++;
-// 	}
-// 	printf("\n");
-// }
-
-
 static void init_reply(t_reply *rply)
 {
 	ft_bzero(rply, sizeof(rply));
@@ -93,49 +75,6 @@ static void init_reply(t_reply *rply)
 	rply->icmp = rply->iov.iov_base + sizeof(struct icmphdr);
 	//print_rply_hex(rply);
 }
-
-
-// static void print_hex_packet(struct ping_pkt *pkt)
-// {
-// 	size_t i;
-// 	size_t width = 16;
-// 	i = 0;
-// 	while (i < sizeof(struct ping_pkt))
-// 	{
-// 		if (i % width == 0)
-// 			printf("000%02lx: ", i);
-// 		printf("%02x ", ((unsigned char *)pkt)[i]);
-// 		if (i % width == width - 1)
-// 			printf("\n");
-// 		i++;
-// 	}
-// 	printf("\n");
-// }
-
-// /*
-//  *  Reads from /sys/class/net/<iface>/statistics/<stat>
-//  */
-// static void read_mac_address(void *mem)
-// {
-// 	int fd;
-
-// 	fd = open("/sys/class/net/eth0/address", O_RDONLY);
-// 	read(fd, mem, 17);
-// 	close(fd);
-// }
-
-// static void print_packet_fields(struct ping_pkt pkt)
-// {
-// 	printf("\n");
-// 	printf("\tPacket size: %ld\n", sizeof(pkt));
-// 	printf("\tPacket type: %d\n", pkt.icmphdr.type);
-// 	printf("\tPacket code: %d\n", pkt.icmphdr.code);
-// 	printf("\tPacket checksum: %d\n", pkt.icmphdr.checksum);
-// 	printf("\tPacket id: %d\n", SWAP16(pkt.icmphdr.un.echo.id));
-// 	printf("\tPacket sequence: %d\n", SWAP16(pkt.icmphdr.un.echo.sequence));
-
-// 	printf("\n");
-// }
 
 static void build_ping_packet(struct ping_pkt *packet, struct timeval current_time)
 {
@@ -153,6 +92,13 @@ static void build_ping_packet(struct ping_pkt *packet, struct timeval current_ti
 	packet->icmphdr.checksum = (checksum(packet, sizeof(packet)));
 	// print_packet_fields(*packet);
 	// print_hex_packet(packet);
+}
+
+static void print_reply(t_reply *t)
+{
+	for (size_t i = 0; i < sizeof(*t); ++i)
+		printf("%02x ", ((unsigned char *)t)[i]);
+	printf("\n");
 }
 
 int ft_ping()
@@ -183,15 +129,22 @@ int ft_ping()
 		printf(".");
 	}
 	rply.received_bytes = recvmsg(g_state.sockfd, &(rply.msghdr), 0);
+	printf("receved bytes: %d\n", rply.received_bytes);
+	print_reply(&rply);
 	if (rply.received_bytes < 0)
 		return (-1);
 		// printf("%s: error: recvfrom failed\n", BIN);
-	if (rply.received_bytes < PING_SZ)
+	if (rply.received_bytes <= 0)
 	{
 		printf("%s: error: socket closed\n\n", BIN);
 		g_state.loop = 0;
 		return (-1);
 	}
+	else if (rply.icmp->icmp_code == ICMP_TIME_EXCEEDED)
+	{
+		printf("%s: error: time exceeded\n\n", BIN);
+	}
+	printf("code: %d\n", rply.icmp->icmp_code);
 	gettimeofday(&t, NULL);
 	// for (size_t i = 0; i < rply.msghdr.msg_iovlen; ++i)
 	// 	printf("%.*s\n", (int)rply.iov.iov_len, (const char*)rply.msghdr.msg_iov[i].iov_base);

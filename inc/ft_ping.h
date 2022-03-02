@@ -23,6 +23,7 @@
 # define DEFAULT_TIMEOUT 1
 # define DEFAULT_INTERVAL 1 // SECONDS 
 # define DEFAULT_TTL 37
+# define IP_HDR_LEN 20
 typedef struct s_lst {
     double ms;
     struct s_lst * next;
