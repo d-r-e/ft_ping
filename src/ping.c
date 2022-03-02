@@ -54,7 +54,7 @@ unsigned short checksum(void *address, size_t len)
 	{
 		sum += *src;
 		src++;
-		len -= sizeof(unsigned short);
+		len -= sizeof(short);
 	}
 	if (len)
 		sum += *(unsigned char *)src;
