@@ -114,7 +114,7 @@ int ft_ping()
 		return (0);
 	gettimeofday(&t0, NULL);
 	build_ping_packet(&pckt, t0);
-	read = sendto(g_state.sockfd, (void *)&pckt, sizeof(pckt), 0, (struct sockaddr *)g_state.addr_list->ai_addr, sizeof(*g_state.addr_list->ai_addr));
+	read = sendto(g_state.sockfd, (void *)&pckt, sizeof(pckt), 0, (const struct sockaddr *)((g_state.addr_list)->ai_addr), sizeof(*(g_state.addr_list)->ai_addr));
 	if (read <= 0)
 	{
 		printf("%s: error: sendto failed\n", BIN);
