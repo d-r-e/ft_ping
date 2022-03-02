@@ -82,6 +82,7 @@ unsigned short checksum(void *address, size_t len)
 
 static void init_reply(t_reply *rply)
 {
+	ft_bzero(rply, sizeof(rply));
 	rply->msghdr.msg_name = NULL;
 	rply->msghdr.msg_iov = &rply->iov;
 	rply->msghdr.msg_iovlen = 1;
@@ -111,17 +112,17 @@ static void init_reply(t_reply *rply)
 // 	printf("\n");
 // }
 
-/*
- *  Reads from /sys/class/net/<iface>/statistics/<stat>
- */
-void read_mac_address(void *mem)
-{
-	int fd;
+// /*
+//  *  Reads from /sys/class/net/<iface>/statistics/<stat>
+//  */
+// static void read_mac_address(void *mem)
+// {
+// 	int fd;
 
-	fd = open("/sys/class/net/eth0/address", O_RDONLY);
-	read(fd, mem, 17);
-	close(fd);
-}
+// 	fd = open("/sys/class/net/eth0/address", O_RDONLY);
+// 	read(fd, mem, 17);
+// 	close(fd);
+// }
 
 // static void print_packet_fields(struct ping_pkt pkt)
 // {
@@ -147,6 +148,8 @@ static void build_ping_packet(struct ping_pkt *packet, struct timeval current_ti
 	packet->icmphdr.un.echo.sequence = SWAP16(msg_count);
 		msg_count++;
 	ft_memcpy(&packet->icmphdr.un, &(current_time.tv_sec), sizeof(current_time.tv_sec));
+	// for (unsigned int i = 0; i < 32; ++i)
+	// 	packet->msg[i] = i;
 	packet->icmphdr.checksum = (checksum(packet, sizeof(packet)));
 	// print_packet_fields(*packet);
 	// print_hex_packet(packet);
@@ -160,7 +163,7 @@ int ft_ping()
 	struct ping_pkt pckt = {};
 	t_reply rply = {};
 
-	ft_bzero(&pckt, sizeof(pckt));
+	ft_bzero(&pckt, sizeof(struct ping_pkt));
 	if (!g_state.loop)
 		return (0);
 	gettimeofday(&t0, NULL);
@@ -172,7 +175,7 @@ int ft_ping()
 		return (-1);
 	}
 	g_state.p_transmitted++;
-	ft_bzero(&rply, sizeof(rply));
+	
 	// while (!rply.received_bytes)
 	init_reply(&rply);
 	if (g_state.f_opt)
