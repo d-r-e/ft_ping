@@ -42,6 +42,10 @@ push: commit
 test:
 	bash test.sh
 
+pcap:
+	tcpdump -c 2 -w ping.pcap & ping -c2 google.es && sleep 1 && tcpdump -r ping.pcap -X
+	tcpdump -c 2 -w ft_ping.pcap & ./ft_ping -c 2 google.es && sleep 1 && tcpdump -r ft_ping.pcap -X
+
 leaks: $(NAME)
 	valgrind --leak-check=full ./ft_ping -o localhost
 	

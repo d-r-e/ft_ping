@@ -8,14 +8,18 @@
 # include <arpa/inet.h>
 # include <sys/time.h>
 # include <signal.h>
+# include <fcntl.h>
+# define __USE_MISC 1
 # include <netinet/ip_icmp.h>
 # include <sys/types.h>
 # include <netdb.h>
+# include <netinet/in.h>
 # include <limits.h>
-# include "../libft/libft.h"
 #include <errno.h>
+
+# include "../libft/libft.h"
 # define BIN "ft_ping"
-# define PING_SZ 56
+# define PING_SZ 64
 # define DEFAULT_TIMEOUT 1
 # define DEFAULT_INTERVAL 1 // SECONDS 
 # define DEFAULT_TTL 37
