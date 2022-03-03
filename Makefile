@@ -49,5 +49,7 @@ pcap:
 leaks: $(NAME)
 	valgrind --leak-check=full ./ft_ping -o localhost
 	
+tcp:
+	tcpdump -X icmp
 
 .PHONY: re all clean fclean commit push

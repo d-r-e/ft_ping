@@ -65,7 +65,6 @@ static unsigned short checksum(void *address, size_t len)
 static void init_reply(t_reply *rply)
 {
 	ft_bzero(rply, sizeof(rply));
-	rply->msghdr.msg_name = NULL;
 	rply->msghdr.msg_iov = &rply->iov;
 	rply->msghdr.msg_iovlen = 1;
 	rply->iov.iov_base = rply->receive_buffer;
@@ -94,11 +93,19 @@ static void build_ping_packet(struct ping_pkt *packet, struct timeval current_ti
 	// print_hex_packet(packet);
 }
 
-static void print_reply(t_reply *t)
+static void print_iovec(t_reply *t)
 {
-	for (size_t i = 0; i < sizeof(*t); ++i)
-		printf("%02x ", ((unsigned char *)t)[i]);
-	printf("\n");
+	for (size_t i = 0; i < t->msghdr.msg_iovlen; ++i)
+	{
+		printf("iovec[%zu].iov_base = %p\n", i, t->msghdr.msg_iov[i].iov_base);
+		printf("iovec[%zu].iov_len = %zu\n", i, t->msghdr.msg_iov[i].iov_len);
+		for (size_t j = 0; j < 64; ++j)
+		{
+			printf("%02x ", ((unsigned char *)t->msghdr.msg_iov[i].iov_base)[j]);
+			if (j % 16 == 15)
+				printf("\n");
+		}
+	}
 }
 
 int ft_ping()
@@ -129,11 +136,10 @@ int ft_ping()
 		printf(".");
 	}
 	rply.received_bytes = recvmsg(g_state.sockfd, &(rply.msghdr), 0);
-	printf("receved bytes: %d\n", rply.received_bytes);
-	print_reply(&rply);
+	print_iovec(&rply);
+	ft_memcpy(rply.icmp, rply.iov.iov_base + 16, sizeof(struct icmp));
 	if (rply.received_bytes < 0)
 		return (-1);
-		// printf("%s: error: recvfrom failed\n", BIN);
 	if (rply.received_bytes <= 0)
 	{
 		printf("%s: error: socket closed\n\n", BIN);
@@ -143,15 +149,15 @@ int ft_ping()
 	else if (rply.icmp->icmp_code == ICMP_TIME_EXCEEDED)
 	{
 		printf("%s: error: time exceeded\n\n", BIN);
+		return(-1);
 	}
 	printf("code: %d\n", rply.icmp->icmp_code);
 	gettimeofday(&t, NULL);
 	// for (size_t i = 0; i < rply.msghdr.msg_iovlen; ++i)
 	// 	printf("%.*s\n", (int)rply.iov.iov_len, (const char*)rply.msghdr.msg_iov[i].iov_base);
 	// // printf("%.*s\n", 24, (const char*)rply.control);
-	printf("reply code %d\n", (unsigned char)((struct icmphdr *)(rply.receive_buffer + sizeof(struct icmphdr)))->code);
-	printf("reply type %d\n", (unsigned char)((struct icmphdr *)(rply.receive_buffer + sizeof(struct icmphdr)))->type);
-
+	printf("reply code %d -- %02x\n", rply.icmp->icmp_code, rply.icmp->icmp_code);
+	printf("reply type %d -- %02x\n", rply.icmp->icmp_type, rply.icmp->icmp_type);
 	g_state.p_received++;
 
 	if (!g_state.f_opt)
