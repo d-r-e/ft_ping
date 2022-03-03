@@ -75,22 +75,34 @@ static void init_reply(t_reply *rply)
 	//print_rply_hex(rply);
 }
 
+static void print_hex_packet(struct ping_pkt *pkt)
+{
+	size_t i;
+
+	i = 0;
+	while (i < sizeof(pkt))
+	{
+		printf("%02x ", ((unsigned char *)&pkt)[i]);
+		i++;
+	}
+	printf("\n");
+}
+
+
 static void build_ping_packet(struct ping_pkt *packet, struct timeval current_time)
 {
-	static int msg_count = 0;
-
 	ft_bzero(packet, sizeof(packet));
 	packet->icmphdr.type = ICMP_ECHO;
 	packet->icmphdr.code = 0;
-	packet->icmphdr.un.echo.id = SWAP16(getpid());
-	packet->icmphdr.un.echo.sequence = SWAP16(msg_count);
-		msg_count++;
-	ft_memcpy(&packet->icmphdr.un, &(current_time.tv_sec), sizeof(current_time.tv_sec));
-	// for (unsigned int i = 0; i < 32; ++i)
-	// 	packet->msg[i] = i;
-	packet->icmphdr.checksum = (checksum(packet, sizeof(packet)));
+	packet->icmphdr.un.echo.id = ft_htons(getpid());
+	packet->icmphdr.un.echo.sequence = ft_htons(g_state.p_transmitted);
+	(void)current_time;
+	ft_memcpy(&packet->msg, &current_time.tv_sec, sizeof(current_time.tv_sec));
+	for (unsigned char i = 0; i < 40; ++i)
+		packet->msg[i + 16] = i;
+	packet->icmphdr.checksum = (checksum(&packet->icmphdr, PING_SZ));
 	// print_packet_fields(*packet);
-	// print_hex_packet(packet);
+	print_hex_packet(packet);
 }
 
 static void print_iovec(t_reply *t)
@@ -135,11 +147,15 @@ int ft_ping()
 	{
 		printf(".");
 	}
-	rply.received_bytes = recvmsg(g_state.sockfd, &(rply.msghdr), 0);
-	print_iovec(&rply);
-	ft_memcpy(rply.icmp, rply.iov.iov_base + 16, sizeof(struct icmp));
-	if (rply.received_bytes < 0)
+	if ((rply.received_bytes = recvmsg(g_state.sockfd, &rply.msghdr, 0)) < 0)
+	{
+		printf("%s: error: recvmsg failed\n", BIN);
 		return (-1);
+	}
+	print_iovec(&rply);
+	if (rply.received_bytes < 0 || errno == EAGAIN)
+		return (-1);
+	printf("received bytes: %u\n", rply.received_bytes - IP_HDR_LEN);
 	if (rply.received_bytes <= 0)
 	{
 		printf("%s: error: socket closed\n\n", BIN);
@@ -163,7 +179,7 @@ int ft_ping()
 	if (!g_state.f_opt)
 	{
 		printf("%u bytes from %s: icmp_seq=%u ttl=%d time=%.3f ms\n",
-			   rply.received_bytes - 12, g_state.host, SWAP16(pckt.icmphdr.un.echo.sequence), g_state.ttl, elapsed(t, t0));
+			   rply.received_bytes - IP_HDR_LEN, g_state.host, SWAP16(pckt.icmphdr.un.echo.sequence), g_state.ttl, elapsed(t, t0));
 	}
 	else
 		printf("\b");
