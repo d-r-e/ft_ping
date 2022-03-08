@@ -8,7 +8,11 @@ set -e
 ./$BIN -c 1 localhost
 ./$BIN -c 1 192.168.1.1
 ./$BIN -c 1 -v elpais.com
-
+./$BIN -c 2 -v google.es
+./$BIN -c 2 -v 8.8.8.8
+./$BIN -c 2 -v localhost
+./$BIN -c 2 -v 192.168.1.1
+./$BIN -c 2 -v elpais.com
 exit 0
 
 /*

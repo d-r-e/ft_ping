@@ -92,11 +92,12 @@ float elapsed(struct timeval a, struct timeval b);
 int ft_ping(void);
 void print_stats(void);
 void ft_exit(int status);
+int verbose(t_reply *rply);
 
-/*
- * MATHUTILS
- */
-double ft_pow(double base, double exp);
+	/*
+	 * MATHUTILS
+	 */
+	double ft_pow(double base, double exp);
 double ft_mean(double data[], int n);
 double ft_variance(double data[], int n);
 

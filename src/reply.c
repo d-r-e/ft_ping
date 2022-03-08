@@ -159,13 +159,13 @@ int receive_reply()
         g_state.p_received++;
         g_state.c_opt--;
     }
-    else if (icmp->type == ICMP_TIME_EXCEEDED)
+    else if (icmp->type == ICMP_TIME_EXCEEDED && g_state.v_opt == 0)
     {
         printf("%ld bytes from %s: Time to live excceeded\n",
                rply.received_bytes,
                inet_ntoa(((struct ip *)(rply.msghdr.msg_iov[0].iov_base))->ip_src));
     }
-    // print_iovec(&rply);
+    verbose(&rply);
     short seq = ft_htons((short)((struct icmphdr *)(rply.msghdr.msg_iov[0].iov_base + sizeof(struct ip)))->un.echo.sequence);
     gettimeofday(&g_state.t, NULL);
     if (!g_state.f_opt && icmp->type == ICMP_ECHOREPLY)
