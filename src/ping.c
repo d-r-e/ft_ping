@@ -68,7 +68,7 @@ static void init_reply(t_reply *rply)
 	rply->msghdr.msg_iov = &rply->iov;
 	rply->msghdr.msg_iovlen = 1;
 	rply->iov.iov_base = rply->receive_buffer;
-	rply->iov.iov_len = sizeof(rply->receive_buffer);
+	rply->iov.iov_len = sizeof(rply->receive_buffer) + 20;
 	rply->msghdr.msg_control = &rply->control;
 	rply->msghdr.msg_controllen = sizeof(rply->control);
 	rply->icmp = rply->iov.iov_base + sizeof(struct icmphdr);
@@ -136,6 +136,7 @@ void print_icmp_hex(struct icmphdr *icmp)
 {
 	for (size_t i = 0 ; i < sizeof(icmp); ++i)
 		printf("%02x ", ((unsigned char *)icmp)[i]);
+	printf("\n");
 }
 
 static void print_iovec(t_reply *t)
@@ -146,7 +147,7 @@ static void print_iovec(t_reply *t)
 	// 	printf("iovec[%zu].iov_len = %zu\n", i, t->msghdr.msg_iov[i].iov_len);
 		// print_ip((struct ip *)t->msghdr.msg_iov[i].iov_base);
 		print_icmp((struct icmphdr *)(t->msghdr.msg_iov[i].iov_base + sizeof(struct ip)));
-		//print_icmp_hex((struct icmphdr *)(t->msghdr.msg_iov[i].iov_base + sizeof(struct ip)));
+		print_icmp_hex((struct icmphdr *)(t->msghdr.msg_iov[i].iov_base + sizeof(struct ip)));
 	}
 }
 
@@ -177,26 +178,25 @@ int ft_ping()
 	{
 		printf(".");
 	}
-	if ((rply.received_bytes = recvmsg(g_state.sockfd, &rply.msghdr, 0)) < 0)
+	rply.received_bytes = recvmsg(g_state.sockfd, &rply.msghdr, 0) ;
+	if (rply.received_bytes <= 0)
 	{
+		// print in red
 		printf("%s: error: recvmsg failed\n", BIN);
 		return (-1);
 	}
-	print_iovec(&rply);
-	if (rply.received_bytes < 0 || errno == EAGAIN)
+	if (errno)
+	{
+		printf("%s: error: %s\n", BIN, strerror(errno));
 		return (-1);
-	// printf("received bytes: %u\n", rply.received_bytes - IP_HDR_LEN);
+	}
 	if (rply.received_bytes <= 0)
 	{
 		printf("%s: error: socket closed\n\n", BIN);
 		g_state.loop = 0;
 		return (-1);
 	}
-	else if (rply.icmp->icmp_code == ICMP_TIME_EXCEEDED)
-	{
-		printf("%s: error: time exceeded\n\n", BIN);
-		return(-1);
-	}
+	print_iovec(&rply);
 	gettimeofday(&t, NULL);
 	g_state.p_received++;
 

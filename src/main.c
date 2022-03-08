@@ -137,6 +137,11 @@ t_state g_state;
 
 int main(int argc, char *argv[])
 {
+	if (getuid() != 0)
+	{
+		printf("%s: Operation not permitted\n", BIN);
+		exit(77);
+	}
 	init_state();
 	parse_options(argc, argv);
 	signal(SIGINT, sighandler);

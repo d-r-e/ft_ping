@@ -1,18 +1,20 @@
 #ifndef FT_PING_H
 #define FT_PING_H
 
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <netdb.h>
 #include <sys/socket.h>
 #include <arpa/inet.h>
 #include <sys/time.h>
 #include <signal.h>
 #include <fcntl.h>
-#define __USE_MISC 1
 #include <netinet/ip_icmp.h>
 #include <sys/types.h>
-#include <netdb.h>
 #include <netinet/in.h>
 #include <limits.h>
 #include <errno.h>
@@ -24,7 +26,7 @@
 #define DEFAULT_INTERVAL 1 // SECONDS
 #define DEFAULT_TTL 37
 #define IP_HDR_LEN 20
-typedef struct s_lst
+			typedef struct s_lst
 {
 	double ms;
 	struct s_lst *next;
@@ -53,6 +55,7 @@ struct s_state
 	unsigned int p_transmitted;
 	unsigned int p_received;
 	struct addrinfo *addr_list;
+	unsigned int addr_index;
 	t_lst *time;
 	// stats
 	double min;
