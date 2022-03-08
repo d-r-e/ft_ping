@@ -92,7 +92,7 @@ static void sighandler(int c)
 void alrmhandler(int sig)
 {
 	(void)sig;
-	receive_reply();
+	ft_ping();
 }
 
 static int get_socket()
@@ -126,7 +126,7 @@ static int main_loop()
 	ft_ping();
 	while (g_state.c_opt || g_state.loop == 1)
 	{
-		
+		continue;
 		;
 	}
 		

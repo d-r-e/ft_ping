@@ -155,19 +155,19 @@ int receive_reply()
         {
             printf("\n");
         }
-        print_iovec(&rply);
     }
     else
     {
         printf("%s: error: ICMP type is not ICMP_ECHOREPLY\n", BIN);
-        return (-1);
     }
     print_iovec(&rply);
+    int seq = ((struct icmphdr *)(rply.msghdr.msg_iov[0].iov_base + sizeof(struct ip)))->un.echo.sequence;
+    printf("seq: %d\n", seq);
     gettimeofday(&g_state.t, NULL);
     if (!g_state.f_opt)
     {
         printf("%lu bytes from %s: icmp_seq=%u ttl=%d time=%.3f ms\n",
-               rply.received_bytes - IP_HDR_LEN, g_state.host, 0, g_state.ttl, elapsed(g_state.t, g_state.t0));
+               rply.received_bytes - IP_HDR_LEN, g_state.host, seq, g_state.ttl, elapsed(g_state.t, g_state.t0));
     }
     else
         printf("\b");
@@ -178,6 +178,5 @@ int receive_reply()
         print_stats();
         ft_exit(0);
     }
-    ft_ping();
     return (0);
 }

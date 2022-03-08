@@ -97,6 +97,7 @@ int ft_ping()
 	ssize_t read;
 	struct ping_pkt pckt = {};
 
+	printf("ping!\n");
 	ft_bzero(&pckt, sizeof(struct ping_pkt));
 	if (!g_state.loop)
 		return (0);
@@ -115,8 +116,10 @@ int ft_ping()
 	}
 	if (g_state.f_opt == 0)
 	{
+		printf("sending alarm %d\n", g_state.p_transmitted);
 		alarm(1);
 	}
+	receive_reply();
 	return (0);
 }
 
