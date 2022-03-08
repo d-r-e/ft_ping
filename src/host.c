@@ -31,3 +31,4 @@ const char *ft_gethostbyname(const char *name)
     //printf("%s\n", g_state.host);
     return (g_state.host);
 }
+

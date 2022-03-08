@@ -75,18 +75,18 @@ static void init_reply(t_reply *rply)
 	//print_rply_hex(rply);
 }
 
-static void print_hex_packet(struct ping_pkt *pkt)
-{
-	size_t i;
+// static void print_hex_packet(struct ping_pkt *pkt)
+// {
+// 	size_t i;
 
-	i = 0;
-	while (i < sizeof(pkt))
-	{
-		printf("%02x ", ((unsigned char *)&pkt)[i]);
-		i++;
-	}
-	printf("\n");
-}
+// 	i = 0;
+// 	while (i < sizeof(pkt))
+// 	{
+// 		printf("%02x ", ((unsigned char *)&pkt)[i]);
+// 		i++;
+// 	}
+// 	printf("\n");
+// }
 
 
 static void build_ping_packet(struct ping_pkt *packet, struct timeval current_time)
@@ -94,29 +94,59 @@ static void build_ping_packet(struct ping_pkt *packet, struct timeval current_ti
 	ft_bzero(packet, sizeof(packet));
 	packet->icmphdr.type = ICMP_ECHO;
 	packet->icmphdr.code = 0;
-	packet->icmphdr.un.echo.id = ft_htons(getpid());
-	packet->icmphdr.un.echo.sequence = ft_htons(g_state.p_transmitted);
+	packet->icmphdr.un.echo.id = SWAP16(getpid());
+	packet->icmphdr.un.echo.sequence = SWAP16(g_state.p_transmitted);
 	(void)current_time;
 	ft_memcpy(&packet->msg, &current_time.tv_sec, sizeof(current_time.tv_sec));
 	for (unsigned char i = 0; i < 40; ++i)
 		packet->msg[i + 16] = i;
 	packet->icmphdr.checksum = (checksum(&packet->icmphdr, PING_SZ));
 	// print_packet_fields(*packet);
-	print_hex_packet(packet);
+}
+
+
+
+ void print_ip(struct ip *ip)
+{
+	printf("IP version: %d\n", ip->ip_v);
+	printf("IP header length: %d\n", ip->ip_hl);
+	printf("IP type of service: %d\n", ip->ip_tos);
+	printf("IP total length: %d\n", ip->ip_len);
+	printf("IP identification: %d\n", ip->ip_id);
+	printf("IP fragment offset: %d\n", ip->ip_off);
+	printf("IP time to live: %d\n", ip->ip_ttl);
+	printf("IP protocol: %d\n", ip->ip_p);
+	printf("IP checksum: %d\n", ip->ip_sum);
+	printf("IP source: %s\n", inet_ntoa(ip->ip_src));
+	printf("IP destination: %s\n", inet_ntoa(ip->ip_dst));
+}
+
+void print_icmp(struct icmphdr *icmp)
+{
+
+	printf("ICMP type: %s (%02x -> %02d)\n", icmp_type_str(icmp->type), icmp->type, icmp->type);
+	if (icmp->type != ICMP_ECHOREPLY)
+		printf("ICMP code: %d\n", icmp->code);
+	// printf("ICMP checksum: %d\n", icmp->checksum);
+	// printf("ICMP id: %d\n", SWAP16(icmp->un.echo.id));
+	// printf("ICMP sequence: %d\n", icmp->un.echo.sequence);
+}
+
+void print_icmp_hex(struct icmphdr *icmp)
+{
+	for (size_t i = 0 ; i < sizeof(icmp); ++i)
+		printf("%02x ", ((unsigned char *)icmp)[i]);
 }
 
 static void print_iovec(t_reply *t)
 {
 	for (size_t i = 0; i < t->msghdr.msg_iovlen; ++i)
 	{
-		printf("iovec[%zu].iov_base = %p\n", i, t->msghdr.msg_iov[i].iov_base);
-		printf("iovec[%zu].iov_len = %zu\n", i, t->msghdr.msg_iov[i].iov_len);
-		for (size_t j = 0; j < 64; ++j)
-		{
-			printf("%02x ", ((unsigned char *)t->msghdr.msg_iov[i].iov_base)[j]);
-			if (j % 16 == 15)
-				printf("\n");
-		}
+	// 	printf("iovec[%zu].iov_base = %p\n", i, t->msghdr.msg_iov[i].iov_base);
+	// 	printf("iovec[%zu].iov_len = %zu\n", i, t->msghdr.msg_iov[i].iov_len);
+		// print_ip((struct ip *)t->msghdr.msg_iov[i].iov_base);
+		print_icmp((struct icmphdr *)(t->msghdr.msg_iov[i].iov_base + sizeof(struct ip)));
+		//print_icmp_hex((struct icmphdr *)(t->msghdr.msg_iov[i].iov_base + sizeof(struct ip)));
 	}
 }
 
@@ -155,7 +185,7 @@ int ft_ping()
 	print_iovec(&rply);
 	if (rply.received_bytes < 0 || errno == EAGAIN)
 		return (-1);
-	printf("received bytes: %u\n", rply.received_bytes - IP_HDR_LEN);
+	// printf("received bytes: %u\n", rply.received_bytes - IP_HDR_LEN);
 	if (rply.received_bytes <= 0)
 	{
 		printf("%s: error: socket closed\n\n", BIN);
@@ -167,13 +197,7 @@ int ft_ping()
 		printf("%s: error: time exceeded\n\n", BIN);
 		return(-1);
 	}
-	printf("code: %d\n", rply.icmp->icmp_code);
 	gettimeofday(&t, NULL);
-	// for (size_t i = 0; i < rply.msghdr.msg_iovlen; ++i)
-	// 	printf("%.*s\n", (int)rply.iov.iov_len, (const char*)rply.msghdr.msg_iov[i].iov_base);
-	// // printf("%.*s\n", 24, (const char*)rply.control);
-	printf("reply code %d -- %02x\n", rply.icmp->icmp_code, rply.icmp->icmp_code);
-	printf("reply type %d -- %02x\n", rply.icmp->icmp_type, rply.icmp->icmp_type);
 	g_state.p_received++;
 
 	if (!g_state.f_opt)
