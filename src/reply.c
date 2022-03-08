@@ -161,10 +161,9 @@ int receive_reply()
     }
     else if (icmp->type == ICMP_TIME_EXCEEDED)
     {
-        struct ip *ip = (struct ip *)(rply.msghdr.msg_iov[0].iov_base);
-        printf("%ld bytes from %s: Time to live excceeded\n", \
-                rply.received_bytes, \
-                inet_ntoa(ip->ip_src));
+        printf("%ld bytes from %s: Time to live excceeded\n",
+               rply.received_bytes,
+               inet_ntoa(((struct ip *)(rply.msghdr.msg_iov[0].iov_base))->ip_src));
     }
     // print_iovec(&rply);
     short seq = ft_htons((short)((struct icmphdr *)(rply.msghdr.msg_iov[0].iov_base + sizeof(struct ip)))->un.echo.sequence);
