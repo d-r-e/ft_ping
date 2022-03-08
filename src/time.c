@@ -7,7 +7,10 @@ float elapsed(struct timeval a, struct timeval b)
     //printf("%f\n", t1 - t0);
     double time = (t0 - t1) / 1000;
     g_state.sum += time;
-    g_state.avg = g_state.sum / g_state.p_received;
+    if (g_state.p_received > 0)
+        g_state.avg = g_state.sum / g_state.p_received;
+    else
+        g_state.avg = 0;
     g_state.msum += ABS(g_state.avg - time);
     g_state.mdev = g_state.msum / g_state.p_received;
     g_state.min = g_state.min != 0 && time > g_state.min ? g_state.min : time;

@@ -139,7 +139,6 @@ int receive_reply()
     t_reply rply = {};
     struct icmphdr *icmp;
 
-    printf("receive_reply\n");
     init_reply(&rply);
     rply.received_bytes = recvmsg(g_state.sockfd, &rply.msghdr, 0);
     if (errno)
@@ -161,8 +160,7 @@ int receive_reply()
         printf("%s: error: ICMP type is not ICMP_ECHOREPLY\n", BIN);
     }
     print_iovec(&rply);
-    int seq = ((struct icmphdr *)(rply.msghdr.msg_iov[0].iov_base + sizeof(struct ip)))->un.echo.sequence;
-    printf("seq: %d\n", seq);
+    short seq = ((struct icmphdr *)(rply.msghdr.msg_iov[0].iov_base + sizeof(struct ip)))->un.echo.sequence;
     gettimeofday(&g_state.t, NULL);
     if (!g_state.f_opt)
     {
