@@ -62,21 +62,12 @@ static unsigned short checksum(void *address, size_t len)
 	return ((unsigned short)~sum);
 }
 
-
-
-// static void print_hex_packet(struct ping_pkt *pkt)
-// {
-// 	size_t i;
-
-// 	i = 0;
-// 	while (i < sizeof(pkt))
-// 	{
-// 		printf("%02x ", ((unsigned char *)&pkt)[i]);
-// 		i++;
-// 	}
-// 	printf("\n");
-// }
-
+/**
+ * @brief Creates icmp packet ready to be sent
+ * The content of the message is the timestamp, plus an arbitrary amount of data
+ * @param packet, pointer to the packet to be filled
+ * @param current_time 
+ */
 static void build_ping_packet(struct ping_pkt *packet, struct timeval current_time)
 {
 	ft_bzero(packet, sizeof(packet));
@@ -92,6 +83,13 @@ static void build_ping_packet(struct ping_pkt *packet, struct timeval current_ti
 	// print_packet_fields(*packet);
 }
 
+/**
+ * @brief main function of the algorithm
+ * the function sends the packet, schedules an alarm for the next one
+ * and then listens awaiting for the reply
+ * 
+ * @return int 
+ */
 int ft_ping()
 {
 	ssize_t read;
@@ -102,7 +100,10 @@ int ft_ping()
 		return (0);
 	gettimeofday(&g_state.t0, NULL);
 	build_ping_packet(&pckt, g_state.t0);
-	read = sendto(g_state.sockfd, (void *)&pckt, sizeof(pckt), 0, (struct sockaddr *)((g_state.addr_list)->ai_addr), sizeof(*(g_state.addr_list)->ai_addr));
+	read = sendto(g_state.sockfd, \
+			(void *)&pckt, sizeof(pckt), 0, \
+			(struct sockaddr *)((g_state.addr_list)->ai_addr), \
+			sizeof(*(g_state.addr_list)->ai_addr));
 	if (read <= 0)
 	{
 		printf("%s: error: sendto failed\n", BIN);

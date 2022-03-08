@@ -55,5 +55,6 @@ void print_stats()
            g_state.p_transmitted, g_state.p_received,
            percent);
     if (g_state.p_received > 0)
-        printf("round-trip min/avg/max/mdev = %.3f/%.3f/%.3f/%.3f ms\n", g_state.min, g_state.avg, g_state.max, g_state.mdev);
+        printf("round-trip min/avg/max/mdev = %.3f/%.3f/%.3f/%.3f ms\n",
+               g_state.min, g_state.avg, g_state.max, g_state.mdev);
 }

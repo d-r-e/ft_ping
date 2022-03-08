@@ -134,6 +134,10 @@ static void init_reply(t_reply *rply)
     // print_rply_hex(rply);
 }
 
+/**
+ * @brief creates a reply struct and listens for an ICMP_ECHOREPLY
+ * @return status as an int 
+ */
 int receive_reply()
 {
     t_reply rply = {};
@@ -151,16 +155,13 @@ int receive_reply()
     {
         gettimeofday(&g_state.t, NULL);
         if (g_state.f_opt)
-        {
             printf("\n");
-        }
         g_state.p_received++;
         g_state.c_opt--;
     }
     else if (icmp->type == ICMP_TIME_EXCEEDED)
     {
         struct ip *ip = (struct ip *)(rply.msghdr.msg_iov[0].iov_base);
-        getnameinfo((struct sockaddr *)&ip->ip_src, sizeof(ip->ip_src), g_state.hostname, sizeof(g_state.hostname), NULL, 0, NI_NAMEREQD);
         printf("%ld bytes from %s: Time to live excceeded\n", \
                 rply.received_bytes, \
                 inet_ntoa(ip->ip_src));
