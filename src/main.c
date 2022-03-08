@@ -6,6 +6,13 @@ static void usage()
 	exit(64);
 }
 
+void ft_exit(int status)
+{
+	free(g_state.host);
+	freeaddrinfo(g_state.addr_list);
+	exit(status);
+}
+
 static void parse_options(int argc, char *argv[])
 {
 	g_state.hostname = NULL;
@@ -77,12 +84,15 @@ static void sighandler(int c)
 	{
 		g_state.loop = 0;
 		printf("\r");
+		print_stats();
+		ft_exit(0);
 	}
-	else if (c == SIGALRM)
-	{
-		g_state.sleep = 1;
-		printf("ding)");
-	}
+}
+
+void alrmhandler(int sig)
+{
+	(void)sig;
+	receive_reply();
 }
 
 static int get_socket()
@@ -111,27 +121,21 @@ static int main_loop()
 		   g_state.s_opt + sizeof(struct icmphdr));
 	if (g_state.c_opt == 0 || get_socket() < 0)
 		return (-1);
-	do
+	if (g_state.c_opt == INT32_MIN)
+		g_state.c_opt = -1;
+	ft_ping();
+	while (g_state.c_opt || g_state.loop == 1)
 	{
-		if (g_state.c_opt == INT32_MIN)
-			g_state.c_opt = -1;
-		ft_ping();
-		--g_state.c_opt;
-
-		if (g_state.c_opt && !g_state.f_opt)
-			ft_sleep(g_state.i_opt);
-	} while (g_state.c_opt && g_state.loop == 1);
+		
+		;
+	}
+		
 	close(g_state.sockfd);
 	print_stats();
 	return (0);
 }
 
-void ft_exit(int status)
-{
-	free(g_state.host);
-	freeaddrinfo(g_state.addr_list); // is this function forbidden?
-	exit(status);
-}
+
 
 t_state g_state;
 
@@ -145,6 +149,7 @@ int main(int argc, char *argv[])
 	init_state();
 	parse_options(argc, argv);
 	signal(SIGINT, sighandler);
+	signal(SIGALRM, alrmhandler);
 	ft_gethostbyname(g_state.hostname);
 	main_loop();
 	ft_exit(0);

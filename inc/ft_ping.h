@@ -64,6 +64,8 @@ struct s_state
 	double msum;
 	double mdev;
 	double sum;
+	struct timeval t;
+	struct timeval t0;
 };
 
 struct ping_pkt
@@ -74,7 +76,7 @@ struct ping_pkt
 
 typedef struct s_reply
 {
-	int received_bytes;
+	size_t received_bytes;
 	struct msghdr msghdr;
 	struct iovec iov;
 	struct icmp *icmp;
@@ -102,6 +104,9 @@ void ft_usleep(long long usec);
 
 const char *icmp_code_str(int code);
 const char *icmp_type_str(int type);
+
+int receive_reply(void);
+
 extern t_state g_state;
 
 #endif

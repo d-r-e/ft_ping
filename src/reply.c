@@ -75,3 +75,109 @@ const char *icmp_code_str(int code)
         return ("UNKNOWN");
     }
 }
+
+void print_ip(struct ip *ip)
+{
+    // printf("IP version: %d\n", ip->ip_v);
+    // printf("IP header length: %d\n", ip->ip_hl);
+    // printf("IP type of service: %d\n", ip->ip_tos);
+    // printf("IP total length: %d\n", ip->ip_len);
+    // printf("IP identification: %d\n", ip->ip_id);
+    // printf("IP fragment offset: %d\n", ip->ip_off);
+    // printf("IP time to live: %d\n", ip->ip_ttl);
+    // printf("IP protocol: %d\n", ip->ip_p);
+    // printf("IP checksum: %d\n", ip->ip_sum);
+    printf("IP source: %s\n", inet_ntoa(ip->ip_src));
+    printf("IP destination: %s\n", inet_ntoa(ip->ip_dst));
+}
+
+void print_icmp(struct icmphdr *icmp)
+{
+
+    printf("ICMP type: %s (%02x -> %02d)\n", icmp_type_str(icmp->type), icmp->type, icmp->type);
+    if (icmp->type != ICMP_ECHOREPLY)
+        printf("ICMP code: %d\n", icmp->code);
+    // printf("ICMP checksum: %d\n", icmp->checksum);
+    // printf("ICMP id: %d\n", SWAP16(icmp->un.echo.id));
+    // printf("ICMP sequence: %d\n", icmp->un.echo.sequence);
+}
+
+void print_icmp_hex(struct icmphdr *icmp)
+{
+    for (size_t i = 0; i < sizeof(icmp); ++i)
+        printf("%02x ", ((unsigned char *)icmp)[i]);
+    printf("\n");
+}
+
+static void print_iovec(t_reply *t)
+{
+    for (size_t i = 0; i < t->msghdr.msg_iovlen; ++i)
+    {
+        // 	printf("iovec[%zu].iov_base = %p\n", i, t->msghdr.msg_iov[i].iov_base);
+        // 	printf("iovec[%zu].iov_len = %zu\n", i, t->msghdr.msg_iov[i].iov_len);
+        // print_ip((struct ip *)t->msghdr.msg_iov[i].iov_base);
+        print_icmp((struct icmphdr *)(t->msghdr.msg_iov[i].iov_base + sizeof(struct ip)));
+        print_icmp_hex((struct icmphdr *)(t->msghdr.msg_iov[i].iov_base + sizeof(struct ip)));
+    }
+}
+
+static void init_reply(t_reply *rply)
+{
+    ft_bzero(rply, sizeof(rply));
+    rply->msghdr.msg_iov = &rply->iov;
+    rply->msghdr.msg_iovlen = 1;
+    rply->iov.iov_base = rply->receive_buffer;
+    rply->iov.iov_len = sizeof(rply->receive_buffer);
+    rply->msghdr.msg_control = &rply->control;
+    rply->msghdr.msg_controllen = sizeof(rply->control);
+    rply->icmp = rply->iov.iov_base + sizeof(struct ip);
+    // print_rply_hex(rply);
+}
+
+int receive_reply()
+{
+    t_reply rply = {};
+    struct icmphdr *icmp;
+
+    printf("receive_reply\n");
+    init_reply(&rply);
+    rply.received_bytes = recvmsg(g_state.sockfd, &rply.msghdr, 0);
+    if (errno)
+    {
+        dprintf(2, "recvmsg: %s\n", "error");
+        return (1);
+    }
+    icmp = (struct icmphdr *)(rply.icmp);
+    if (icmp->type == ICMP_ECHOREPLY)
+    {
+        gettimeofday(&g_state.t, NULL);
+        if (g_state.f_opt)
+        {
+            printf("\n");
+        }
+        print_iovec(&rply);
+    }
+    else
+    {
+        printf("%s: error: ICMP type is not ICMP_ECHOREPLY\n", BIN);
+        return (-1);
+    }
+    print_iovec(&rply);
+    gettimeofday(&g_state.t, NULL);
+    if (!g_state.f_opt)
+    {
+        printf("%lu bytes from %s: icmp_seq=%u ttl=%d time=%.3f ms\n",
+               rply.received_bytes - IP_HDR_LEN, g_state.host, 0, g_state.ttl, elapsed(g_state.t, g_state.t0));
+    }
+    else
+        printf("\b");
+    g_state.p_received++;
+    g_state.c_opt--;
+    if (!g_state.c_opt)
+    {
+        print_stats();
+        ft_exit(0);
+    }
+    ft_ping();
+    return (0);
+}

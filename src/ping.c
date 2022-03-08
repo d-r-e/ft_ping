@@ -44,8 +44,8 @@
 
 static unsigned short checksum(void *address, size_t len)
 {
-	unsigned short	*src;
-	unsigned long	sum;
+	unsigned short *src;
+	unsigned long sum;
 
 	src = (unsigned short *)address;
 	sum = 0;
@@ -57,23 +57,12 @@ static unsigned short checksum(void *address, size_t len)
 	}
 	if (len)
 		sum += *(unsigned char *)src;
-	sum = (sum >> 16) + (sum & 0xFFFF);
+	sum = (sum >> 16) + (sum & 0xffff);
 	sum += (sum >> 16);
 	return ((unsigned short)~sum);
 }
 
-static void init_reply(t_reply *rply)
-{
-	ft_bzero(rply, sizeof(rply));
-	rply->msghdr.msg_iov = &rply->iov;
-	rply->msghdr.msg_iovlen = 1;
-	rply->iov.iov_base = rply->receive_buffer;
-	rply->iov.iov_len = sizeof(rply->receive_buffer) + 20;
-	rply->msghdr.msg_control = &rply->control;
-	rply->msghdr.msg_controllen = sizeof(rply->control);
-	rply->icmp = rply->iov.iov_base + sizeof(struct icmphdr);
-	//print_rply_hex(rply);
-}
+
 
 // static void print_hex_packet(struct ping_pkt *pkt)
 // {
@@ -87,7 +76,6 @@ static void init_reply(t_reply *rply)
 // 	}
 // 	printf("\n");
 // }
-
 
 static void build_ping_packet(struct ping_pkt *packet, struct timeval current_time)
 {
@@ -104,66 +92,16 @@ static void build_ping_packet(struct ping_pkt *packet, struct timeval current_ti
 	// print_packet_fields(*packet);
 }
 
-
-
- void print_ip(struct ip *ip)
-{
-	printf("IP version: %d\n", ip->ip_v);
-	printf("IP header length: %d\n", ip->ip_hl);
-	printf("IP type of service: %d\n", ip->ip_tos);
-	printf("IP total length: %d\n", ip->ip_len);
-	printf("IP identification: %d\n", ip->ip_id);
-	printf("IP fragment offset: %d\n", ip->ip_off);
-	printf("IP time to live: %d\n", ip->ip_ttl);
-	printf("IP protocol: %d\n", ip->ip_p);
-	printf("IP checksum: %d\n", ip->ip_sum);
-	printf("IP source: %s\n", inet_ntoa(ip->ip_src));
-	printf("IP destination: %s\n", inet_ntoa(ip->ip_dst));
-}
-
-void print_icmp(struct icmphdr *icmp)
-{
-
-	printf("ICMP type: %s (%02x -> %02d)\n", icmp_type_str(icmp->type), icmp->type, icmp->type);
-	if (icmp->type != ICMP_ECHOREPLY)
-		printf("ICMP code: %d\n", icmp->code);
-	// printf("ICMP checksum: %d\n", icmp->checksum);
-	// printf("ICMP id: %d\n", SWAP16(icmp->un.echo.id));
-	// printf("ICMP sequence: %d\n", icmp->un.echo.sequence);
-}
-
-void print_icmp_hex(struct icmphdr *icmp)
-{
-	for (size_t i = 0 ; i < sizeof(icmp); ++i)
-		printf("%02x ", ((unsigned char *)icmp)[i]);
-	printf("\n");
-}
-
-static void print_iovec(t_reply *t)
-{
-	for (size_t i = 0; i < t->msghdr.msg_iovlen; ++i)
-	{
-	// 	printf("iovec[%zu].iov_base = %p\n", i, t->msghdr.msg_iov[i].iov_base);
-	// 	printf("iovec[%zu].iov_len = %zu\n", i, t->msghdr.msg_iov[i].iov_len);
-		// print_ip((struct ip *)t->msghdr.msg_iov[i].iov_base);
-		print_icmp((struct icmphdr *)(t->msghdr.msg_iov[i].iov_base + sizeof(struct ip)));
-		print_icmp_hex((struct icmphdr *)(t->msghdr.msg_iov[i].iov_base + sizeof(struct ip)));
-	}
-}
-
 int ft_ping()
 {
-	struct timeval t0 = {0, 0};
-	struct timeval t = {0, 0};
 	ssize_t read;
 	struct ping_pkt pckt = {};
-	t_reply rply = {};
 
 	ft_bzero(&pckt, sizeof(struct ping_pkt));
 	if (!g_state.loop)
 		return (0);
-	gettimeofday(&t0, NULL);
-	build_ping_packet(&pckt, t0);
+	gettimeofday(&g_state.t0, NULL);
+	build_ping_packet(&pckt, g_state.t0);
 	read = sendto(g_state.sockfd, (void *)&pckt, sizeof(pckt), 0, (struct sockaddr *)((g_state.addr_list)->ai_addr), sizeof(*(g_state.addr_list)->ai_addr));
 	if (read <= 0)
 	{
@@ -171,41 +109,14 @@ int ft_ping()
 		return (-1);
 	}
 	g_state.p_transmitted++;
-	
-	// while (!rply.received_bytes)
-	init_reply(&rply);
 	if (g_state.f_opt)
 	{
 		printf(".");
 	}
-	rply.received_bytes = recvmsg(g_state.sockfd, &rply.msghdr, 0) ;
-	if (rply.received_bytes <= 0)
+	if (g_state.f_opt == 0)
 	{
-		// print in red
-		printf("%s: error: recvmsg failed\n", BIN);
-		return (-1);
+		alarm(1);
 	}
-	if (errno)
-	{
-		printf("%s: error: %s\n", BIN, strerror(errno));
-		return (-1);
-	}
-	if (rply.received_bytes <= 0)
-	{
-		printf("%s: error: socket closed\n\n", BIN);
-		g_state.loop = 0;
-		return (-1);
-	}
-	print_iovec(&rply);
-	gettimeofday(&t, NULL);
-	g_state.p_received++;
-
-	if (!g_state.f_opt)
-	{
-		printf("%u bytes from %s: icmp_seq=%u ttl=%d time=%.3f ms\n",
-			   rply.received_bytes - IP_HDR_LEN, g_state.host, SWAP16(pckt.icmphdr.un.echo.sequence), g_state.ttl, elapsed(t, t0));
-	}
-	else
-		printf("\b");
 	return (0);
 }
+
