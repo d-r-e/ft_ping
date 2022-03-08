@@ -109,7 +109,7 @@ void print_icmp_hex(struct icmphdr *icmp)
     printf("\n");
 }
 
-static void print_iovec(t_reply *t)
+void print_iovec(t_reply *t)
 {
     for (size_t i = 0; i < t->msghdr.msg_iovlen; ++i)
     {
@@ -154,23 +154,27 @@ int receive_reply()
         {
             printf("\n");
         }
+        g_state.p_received++;
+        g_state.c_opt--;
     }
-    else
+    else if (icmp->type == ICMP_TIME_EXCEEDED)
     {
-        printf("%s: error: ICMP type is not ICMP_ECHOREPLY\n", BIN);
+        struct ip *ip = (struct ip *)(rply.msghdr.msg_iov[0].iov_base);
+        getnameinfo((struct sockaddr *)&ip->ip_src, sizeof(ip->ip_src), g_state.hostname, sizeof(g_state.hostname), NULL, 0, NI_NAMEREQD);
+        printf("%ld bytes from %s: Time to live excceeded\n", \
+                rply.received_bytes, \
+                inet_ntoa(ip->ip_src));
     }
-    print_iovec(&rply);
-    short seq = ((struct icmphdr *)(rply.msghdr.msg_iov[0].iov_base + sizeof(struct ip)))->un.echo.sequence;
+    // print_iovec(&rply);
+    short seq = ft_htons((short)((struct icmphdr *)(rply.msghdr.msg_iov[0].iov_base + sizeof(struct ip)))->un.echo.sequence);
     gettimeofday(&g_state.t, NULL);
-    if (!g_state.f_opt)
+    if (!g_state.f_opt && icmp->type == ICMP_ECHOREPLY)
     {
         printf("%lu bytes from %s: icmp_seq=%u ttl=%d time=%.3f ms\n",
                rply.received_bytes - IP_HDR_LEN, g_state.host, seq, g_state.ttl, elapsed(g_state.t, g_state.t0));
     }
     else
         printf("\b");
-    g_state.p_received++;
-    g_state.c_opt--;
     if (!g_state.c_opt)
     {
         print_stats();
