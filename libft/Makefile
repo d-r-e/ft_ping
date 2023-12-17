@@ -15,7 +15,7 @@ RM = rm -f
 
 CC = gcc
 
-CCFLAGS = -Wall -Wextra -Werror -O3
+CCFLAGS = -Wall -Wextra -Werror
 
 NAME = libft.a
 
@@ -26,7 +26,8 @@ SRC = ft_memset.c ft_bzero.c ft_memcpy.c \
 	  ft_memmove.c ft_strlcpy.c ft_isspace.c ft_calloc.c ft_strchr.c\
 	  ft_substr.c ft_strjoin.c ft_strtrim.c ft_strncpy.c ft_strcmp.c ft_charcount.c \
 	  ft_wordlen.c ft_wordcount.c ft_split.c ft_itoa.c ft_strmapi.c ft_putchar_fd.c \
-	  ft_putstr_fd.c ft_putendl_fd.c ft_putnbr_fd.c ft_htons.c
+	  ft_putstr_fd.c ft_putendl_fd.c ft_putnbr_fd.c ft_puts.c get_next_line.c \
+	  ft_getopt.c
 
 OBJ = $(SRC:.c=.o)
 
@@ -54,14 +55,18 @@ bonus: $(BONUSOBJ) $(INCLUDE)
 	$(CC) $(CCFLAGS) -c -o $@ $<
 
 clean:
-	@$(RM) $(OBJ) $(BONUSOBJ)
+	$(RM) $(OBJ) $(BONUSOBJ)
 
 fclean: clean
-	@$(RM) $(NAME)
+	$(RM) $(NAME)
 
 re: fclean all
 
 rebonus: fclean bonus
 
+push: fclean
+	git add .
+	git commit -m "update"
+	git push
 
 .PHONY: clean fclean

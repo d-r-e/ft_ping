@@ -1,18 +1,18 @@
 NAME=ft_ping
-SRC=src/main.c src/host.c src/ping.c src/time.c src/stats.c src/reply.c src/verbose.c
+SRC=src/main.c src/input.c src/ping.c src/icmp.c
 OBJ = $(SRC:.c=.o)
-FLAGS= -O2 -Wall -Wextra -Werror -Wformat-security
+FLAGS= -O0 -g3 -Wall -Wextra -Werror -Wformat-security
 LIBFT=libft/libft.a
-INC=inc/$(NAME).h
+INC=inc/
 
-$(NAME): $(OBJ) $(LIBFT) 
-	gcc $(FLAGS) $(OBJ) -I libft -L libft -lft -o $(NAME)
+$(NAME):  $(LIBFT)  $(OBJ)
+	gcc $(FLAGS) $(OBJ) -I libft -I $(INC) -L libft -lft -o $(NAME)
 
 $(LIBFT):
 	$(MAKE) -C libft
 
 %.o: %.c $(INC)
-	gcc $(FLAGS) -c -o $@ $<
+	gcc $(FLAGS) -I $(INC) -c -o $@ $<
 
 clean:
 	$(MAKE) clean -C libft
@@ -39,7 +39,7 @@ commit: all test fclean
 push: commit
 	@git push origin main
 
-test:
+test: $(NAME)
 	bash test.sh
 
 pcap:

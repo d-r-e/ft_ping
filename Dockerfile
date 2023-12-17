@@ -1,2 +1,2 @@
-FROM darodrig/devimage
-RUN apt-get install -y inetutils-ping libcap2-bin tcpdump traceroute
+FROM debian:bullseye
+RUN apt-get update && apt-get install -yq inetutils-ping netcat traceroute git gcc make

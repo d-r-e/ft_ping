@@ -1,156 +1,48 @@
-#include "../inc/ft_ping.h"
+#include "ft_ping.h"
 
-static void usage()
-{
-	dprintf(2, "usage: ft_ping [-hv] host\n");
-	exit(64);
-}
 
-void ft_exit(int status)
-{
-	free(g_state.host);
-	freeaddrinfo(g_state.addr_list);
-	exit(status);
-}
+int main(int argc, char **argv){
+	char opt;
+	int optind = 0;
+	t_state state;
 
-static void parse_options(int argc, char *argv[])
-{
-	g_state.hostname = NULL;
-	for (int i = 1; i < argc; ++i)
+	if (argc < 2)
+		print_error("missing host operand");
+	ft_bzero(&state, sizeof(t_state));
+	ft_bzero(&state.options, sizeof(t_ping_options));
+	while (++optind < argc && !ft_strncmp(argv[optind], "-", 1) && ft_strlen(argv[optind > 1]))
 	{
-		if (ft_strlen(argv[i]) > 1 && !ft_strncmp(argv[i], "-v", 3))
-			g_state.v_opt = 1;
-		else if (!ft_strncmp(argv[i], "-c", ft_strlen("-c") + 1))
+		if (!ft_strcmp("--help", argv[optind]) || !ft_strcmp("-h", argv[optind]))
+			print_help();
+		else if (!ft_strchr("cvV?", argv[optind][1]))
+			print_error("invalid option -- 'f'");
+		opt = argv[optind][1];
+		if (opt == 'c')
 		{
-			if (i + 1 < argc)
-				g_state.c_opt = ft_atoi(argv[++i]);
+			if (argv[optind][2])
+				state.options.count = ft_atoi(argv[optind] + 2);
+			else if (optind + 1 < argc)
+				state.options.count = ft_atoi(argv[++optind]);
 			else
-				usage();
-			if (g_state.c_opt <= 0)
-				usage();
+				print_error("option requires an argument -- 'c'");
+			if (state.options.count < 1)
+				print_error("ping count must be greater than 0");
 		}
-		else if (!ft_strncmp(argv[i], "-i", ft_strlen("-i") + 1))
-		{
-			if (i + 1 < argc)
-				g_state.i_opt = ft_atoi(argv[++i]);
-			else
-				usage();
-			if (g_state.i_opt < 0)
-				usage();
-		}
-		else if (!ft_strncmp(argv[i], "--ttl", ft_strlen("--ttl") + 1))
-		{
-			if (i + 1 < argc)
-				g_state.ttl = ft_atoi(argv[++i]);
-			else
-				g_state.ttl = DEFAULT_TTL;
-			if (g_state.ttl <= 0)
-				usage();
-		}
-		else if (ft_strlen(argv[i]) > 1 && !ft_strncmp(argv[i], "-f", 3))
-		{
-			if (getuid())
-			{
-				printf("%s: -f flag: Operation not permitted\n", BIN);
-				exit(77);
-			}
-			g_state.f_opt = 1;
-		}
-		else if (ft_strlen(argv[i]) > 1 && !ft_strncmp(argv[i], "-h", 3))
-			g_state.h_opt = 1;
-		else if (ft_strlen(argv[i]) && argv[i][0] == '-')
-			usage();
-		else if (ft_strlen(argv[i]) && (argv[i][0]) != '-')
-			g_state.hostname = argv[i];
+		else if (opt == 'v')
+			state.options.verbose = 1;
+		else if (opt == 'V')
+			print_version();
+		else if (opt == '?')
+			print_help();
 	}
-	if (!g_state.hostname)
-		usage();
-}
-
-static void init_state()
-{
-	ft_bzero(&g_state, sizeof(g_state));
-	g_state.time = NULL;
-	g_state.c_opt = -1;
-	g_state.s_opt = PING_SZ;
-	g_state.ttl = 37;
-	g_state.loop = 1;
-	g_state.i_opt = 1;
-}
-
-static void sighandler(int c)
-{
-	if (c == SIGINT)
+	if (optind >= argc)
+		print_error("missing host operand");
+	while (optind < argc)
 	{
-		g_state.loop = 0;
-		printf("\r");
-		print_stats();
-		ft_exit(0);
+		state.options.host = argv[optind++];
+		printf("host: %s\n", state.options.host);
+		socket_init(state);
+		ft_ping(state);
 	}
-}
 
-void alrmhandler(int sig)
-{
-	(void)sig;
-	ft_ping();
-}
-
-static int get_socket()
-{
-	struct timeval timeout = {1, 0};
-
-	g_state.sockfd = socket(AF_INET, SOCK_RAW, IPPROTO_ICMP);
-	if (g_state.sockfd < 0)
-	{
-		printf("%s: error: no socket\n", BIN);
-		return (-1);
-	}
-	if ((setsockopt(g_state.sockfd, IPPROTO_IP, IP_TTL, &(g_state.ttl), sizeof(g_state.ttl))) == -1)
-		return (-1);
-	if ((setsockopt(g_state.sockfd, SOL_SOCKET, SO_RCVTIMEO, (const void *)&timeout, sizeof(timeout))) == -1)
-		return (-1);
-	return (g_state.sockfd);
-}
-
-static int main_loop()
-{
-	printf("%s: %s (%s): %ld(%ld) data bytes\n", "PING",
-		   g_state.hostname,
-		   (ft_strlen(g_state.host) != 0) ? g_state.host : g_state.hostname,
-		   g_state.s_opt,
-		   g_state.s_opt + sizeof(struct icmphdr));
-	if (g_state.c_opt == 0 || get_socket() < 0)
-		return (-1);
-	if (g_state.c_opt == INT32_MIN)
-		g_state.c_opt = -1;
-	ft_ping();
-	while (g_state.c_opt || g_state.loop == 1)
-	{
-		continue;
-		;
-	}
-		
-	close(g_state.sockfd);
-	print_stats();
-	return (0);
-}
-
-
-
-t_state g_state;
-
-int main(int argc, char *argv[])
-{
-	if (getuid() != 0)
-	{
-		printf("%s: Operation not permitted\n", BIN);
-		exit(77);
-	}
-	init_state();
-	parse_options(argc, argv);
-	signal(SIGINT, sighandler);
-	signal(SIGALRM, alrmhandler);
-	ft_gethostbyname(g_state.hostname);
-	main_loop();
-	ft_exit(0);
 }

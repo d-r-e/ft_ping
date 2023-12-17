@@ -12,7 +12,7 @@ float elapsed(struct timeval a, struct timeval b)
     else
         g_state.avg = 0;
     g_state.msum += ABS(g_state.avg - time);
-    g_state.mdev = g_state.msum / g_state.p_received;
+    g_state.stddev = g_state.msum / g_state.p_received;
     g_state.min = g_state.min != 0 && time > g_state.min ? g_state.min : time;
     g_state.max = time >= g_state.max ? time : g_state.max;
     return (time);

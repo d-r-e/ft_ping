@@ -1,122 +1,97 @@
-#include "../inc/ft_ping.h"
+#include "ft_ping.h"
 
-// uint16_t
-// checksum(uint16_t *addr, size_t len)
-// {
-// 	int nleft, sum;
-// 	uint16_t *w;
-// 	union
-// 	{
-// 		uint16_t us;
-// 		unsigned char uc[2];
-// 	} last;
-// 	uint16_t answer;
-
-// 	nleft = len;
-// 	sum = 0;
-// 	w = addr;
-
-// 	/*
-// 	 * The algorithm is simple, using a 32 bit accumulator (sum), we add
-// 	 * sequential 16 bit words to it, and at the end, fold back all the
-// 	 * carry bits from the top 16 bits into the lower 16 bits.
-// 	 */
-// 	while (nleft > 1)
-// 	{
-// 		sum += *w++;
-// 		nleft -= 2;
-// 	}
-
-// 	/* append an odd byte for padding, if necessary */
-// 	if (nleft == 1)
-// 	{
-// 		last.uc[0] = *(unsigned char *)w;
-// 		last.uc[1] = 0;
-// 		sum += last.us;
-// 	}
-
-// 	/* add back carry outs from top 16 bits to low 16 bits */
-// 	sum = (sum >> 16) + (sum & 0xffff); /* add hi 16 to low 16 */
-// 	sum += (sum >> 16);					/* add carry */
-// 	answer = ~sum;						/* 1st compliment && truncate to 16 bits */
-// 	return (answer);
-// }
-
-static unsigned short checksum(void *address, size_t len)
+int socket_init(t_state state)
 {
-	unsigned short *src;
-	unsigned long sum;
+    char *host = state.options.host;
+    struct addrinfo hints;
+    struct addrinfo *res;
+    // struct addrinfo *ressave;
+    int n;
 
-	src = (unsigned short *)address;
-	sum = 0;
-	while (len > 1)
-	{
-		sum += *src;
-		src++;
-		len -= sizeof(short);
-	}
-	if (len)
-		sum += *(unsigned char *)src;
-	sum = (sum >> 16) + (sum & 0xffff);
-	sum += (sum >> 16);
-	return ((unsigned short)~sum);
+    ft_bzero(&hints, sizeof(struct addrinfo));
+    hints.ai_family = AF_INET;
+    hints.ai_socktype = SOCK_RAW;
+    hints.ai_protocol = IPPROTO_ICMP;
+    if ((n = getaddrinfo(host, NULL, &hints, &res)) != 0)
+        print_error("getaddrinfo error for host");
+    // ressave = res;
+    state.addr_list = res;
+    state.protocol = res->ai_protocol;
+    if ((state.sockfd = socket(res->ai_family, res->ai_socktype, res->ai_protocol)) < 0)
+        print_error("socket error");
+    if (state.options.ttl_set)
+    {
+        if (setsockopt(state.sockfd, IPPROTO_IP, IP_TTL, &state.ttl, sizeof(state.ttl)) < 0)
+            print_error("setsockopt error");
+    }
+    if (connect(state.sockfd, res->ai_addr, res->ai_addrlen) < 0)
+        print_error("connect error");
+
+    // freeaddrinfo(ressave);
+    return (0);
 }
 
-/**
- * @brief Creates icmp packet ready to be sent
- * The content of the message is the timestamp, plus an arbitrary amount of data
- * @param packet, pointer to the packet to be filled
- * @param current_time 
- */
-static void build_ping_packet(struct ping_pkt *packet, struct timeval current_time)
+void receive_reply(t_state state)
 {
-	ft_bzero(packet, sizeof(packet));
-	packet->icmphdr.type = ICMP_ECHO;
-	packet->icmphdr.code = 0;
-	packet->icmphdr.un.echo.id = SWAP16(getpid());
-	packet->icmphdr.un.echo.sequence = SWAP16(g_state.p_transmitted);
-	(void)current_time;
-	ft_memcpy(&packet->msg, &current_time.tv_sec, sizeof(current_time.tv_sec));
-	for (unsigned char i = 0; i < 40; ++i)
-		packet->msg[i + 16] = i;
-	packet->icmphdr.checksum = (checksum(&packet->icmphdr, PING_SZ));
-	// print_packet_fields(*packet);
+    ssize_t read;
+    t_icmp_packet pckt;
+    struct sockaddr_in r_addr;
+    socklen_t len = sizeof(r_addr);
+    struct timeval t1;
+
+    ft_bzero(&pckt, sizeof(t_icmp_packet));
+    read = recvfrom(state.sockfd, &pckt, sizeof(pckt), 0, (struct sockaddr *)&r_addr, &len);
+    if (read <= 0)
+    {
+        printf("%s: error: recvfrom failed\n", BIN);
+        return;
+    }
+    gettimeofday(&t1, NULL);
+    state.rx++;
+    if (state.options.verbose)
+    {
+        printf("%ld bytes from %s: icmp_seq=%d ttl=%d time=%ld ms\n", \
+                read, inet_ntoa(r_addr.sin_addr), \
+                SWAP16(pckt.icmphdr.un.echo.sequence), \
+                pckt.msg[8], \
+                (t1.tv_usec - state.t0.tv_usec) / 1000);
+    }
+    else
+    {
+        printf("%ld bytes from %s: icmp_seq=%d ttl=%d time=%ld ms\n", \
+                read, inet_ntoa(r_addr.sin_addr), \
+                SWAP16(pckt.icmphdr.un.echo.sequence), \
+                pckt.msg[8], \
+                (t1.tv_usec - state.t0.tv_usec) / 1000);
+    }
 }
 
-/**
- * @brief main function of the algorithm
- * the function sends the packet, schedules an alarm for the next one
- * and then listens awaiting for the reply
- * 
- * @return int 
- */
-int ft_ping()
+
+void ft_ping(t_state state)
 {
-	ssize_t read;
-	struct ping_pkt pckt = {};
+    ssize_t read;
+    t_icmp_packet pckt;
 
-	ft_bzero(&pckt, sizeof(struct ping_pkt));
-	if (!g_state.loop)
-		return (0);
-	gettimeofday(&g_state.t0, NULL);
-	build_ping_packet(&pckt, g_state.t0);
-	read = sendto(g_state.sockfd, \
-			(void *)&pckt, sizeof(pckt), 0, \
-			(struct sockaddr *)((g_state.addr_list)->ai_addr), \
-			sizeof(*(g_state.addr_list)->ai_addr));
-	if (read <= 0)
-	{
-		printf("%s: error: sendto failed\n", BIN);
-		return (-1);
-	}
-	g_state.p_transmitted++;
-	if (g_state.f_opt)
-	{
-		printf(".");
-	}
-	if (g_state.f_opt == 0)
-		alarm(1);
-	receive_reply();
-	return (0);
+    ft_bzero(&pckt, sizeof(t_icmp_packet));
+
+    gettimeofday(&state.t0, NULL);
+    build_ping_packet(&pckt, state.t0);
+    read = sendto(state.sockfd, \
+                (void *)&pckt, sizeof(pckt), 0, \
+                (struct sockaddr *)((state.addr_list)->ai_addr), \
+                (state.addr_list)->ai_addrlen);
+    if (read <= 0)
+    {
+        printf("%s: error: sendto failed\n", BIN);
+        return;
+    }
+    state.tx++;
+    if (state.options.flood)
+    {
+        printf(".");
+    }
+    if (state.options.flood == 0)
+        alarm(1);
+    printf("DEBUG: ping sent\n");
+    receive_reply(state);
 }
-
