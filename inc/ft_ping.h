@@ -29,4 +29,4 @@ void help(void);
 
 int is_digit(const char *str);
 
-int ft_ping(const char *, unsigned int ttl, long count, unsigned int timeout);
+int ft_ping(const char *hostname, unsigned int ttl, long count, unsigned int timeout_ms, int verbose);
