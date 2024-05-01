@@ -1,5 +1,5 @@
 NAME=ft_ping
-SRC=src/main.c src/help.c src/ping.c src/util.c src/stat.c
+SRC=src/main.c src/help.c src/ping.c src/util.c src/stat.c src/reply.c
 OBJ = $(SRC:.c=.o)
 FLAGS= -g -Wall -Wextra -Werror #  -Wformat-security
 INC=inc

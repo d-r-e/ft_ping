@@ -104,13 +104,41 @@ int set_ttl(int sockfd, unsigned int ttl)
     }
     return 0;
 }
+
+int setup_socket(unsigned int ttl)
+{
+    int sockfd = socket(AF_INET, SOCK_RAW, IPPROTO_ICMP);
+    if (sockfd < 0)
+    {
+        perror("Socket creation failed");
+        return -1;
+    }
+    if (set_ttl(sockfd, ttl) < 0)
+    {
+        close(sockfd);
+        return -1;
+    }
+    return sockfd;
+}
+
+struct sockaddr_in prepare_dest_addr(const char *ip)
+{
+    struct sockaddr_in dest_addr;
+    memset(&dest_addr, 0, sizeof(dest_addr));
+    dest_addr.sin_family = AF_INET;
+    inet_pton(AF_INET, ip, &dest_addr.sin_addr);
+    return dest_addr;
+}
+
 int ft_ping(const char *hostname, unsigned int ttl, long count, unsigned int timeout_ms, int verbose)
 {
-    (void)verbose;
     struct timeval timeout = {timeout_ms / 1000, (timeout_ms % 1000) * 1000};
-    unsigned int seq_number = -1;
-    fd_set readfds;
-
+    unsigned int seq_number = 0;
+    unsigned int received = 0;
+    struct sigaction act;
+    int sockfd;
+    
+    (void)verbose;
     const char *ip = get_ip(hostname);
     if (!ip)
     {
@@ -118,84 +146,43 @@ int ft_ping(const char *hostname, unsigned int ttl, long count, unsigned int tim
         return 1;
     }
 
-    int sockfd = socket(AF_INET, SOCK_RAW, IPPROTO_ICMP);
+    sockfd = setup_socket(ttl);
     if (sockfd < 0)
-    {
-        perror("Socket creation failed");
         return 1;
+
+    printf("PING %s (%s) %ld data bytes\n", hostname, ip, PING_PKT_SIZE - sizeof(struct icmphdr));
+    struct sockaddr_in dest_addr = prepare_dest_addr(ip);
+
+    memset(&act, 0, sizeof(act));
+    if (count != 1)
+    {
+        act.sa_handler = &sig_handler;
+        sigaction(SIGALRM, &act, NULL);
+        alarm(1);
     }
 
-    if (set_ttl(sockfd, ttl) < 0)
-    {
-        close(sockfd);
-        return 1;
-    }
-
-    printf("PING %s (%s) %d data bytes\n", hostname, ip, PING_PKT_SIZE);
-    struct sockaddr_in dest_addr;
-    memset(&dest_addr, 0, sizeof(dest_addr));
-    dest_addr.sin_family = AF_INET;
-    inet_pton(AF_INET, ip, &dest_addr.sin_addr);
-
-    if (count == 1)
+    while (count--)
     {
         ping_pkt_t pkt;
-        fill_icmp_packet(&pkt, seq_number);
+        fill_icmp_packet(&pkt, seq_number++);
         if (send_ping(sockfd, &dest_addr, &pkt) == -1)
         {
             close(sockfd);
             return 1;
         }
 
-        FD_ZERO(&readfds);
-        FD_SET(sockfd, &readfds);
-
-        int ret = select(sockfd + 1, &readfds, NULL, NULL, &timeout);
-        if (ret == -1)
+        int reply_status = handle_reply(sockfd, &dest_addr, &timeout);
+        if (reply_status == 1)
         {
-            perror("Select failed");
-            close(sockfd);
-            return 1;
+            received++;
         }
-        else if (ret)
+        else if (reply_status == 0)
         {
-            printf("Received packet from %s\n", ip);
+            printf("Request timeout for icmp_seq %d\n", seq_number);
         }
-    }
-    else
-    {
-        struct sigaction act;
-        memset(&act, 0, sizeof(act));
-        act.sa_handler = &sig_handler;
-        sigaction(SIGALRM, &act, NULL);
-        alarm(1);
 
-        while (count--)
-        {
-            ping_pkt_t pkt;
-            fill_icmp_packet(&pkt, seq_number++);
-            if (send_ping(sockfd, &dest_addr, &pkt) == -1)
-            {
-                close(sockfd);
-                return 1;
-            }
-
-            FD_ZERO(&readfds);
-            FD_SET(sockfd, &readfds);
-
-            int ret = select(sockfd + 1, &readfds, NULL, NULL, &timeout);
-            if (ret == -1)
-            {
-                perror("Select failed");
-                close(sockfd);
-                return 1;
-            }
-            else if (ret)
-            {
-                printf("Received packet from %s\n", ip);
-            }
+        if (count != 0)
             pause();
-        }
     }
 
     close(sockfd);
