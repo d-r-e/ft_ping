@@ -1,7 +1,5 @@
 #include <ft_ping.h>
 
-
-
 int main(int argc, char **argv)
 {
     char c;
@@ -41,6 +39,7 @@ int main(int argc, char **argv)
             break;
         case 'w':
             is_digit(optarg) ? timeout = atoi(optarg) : usage();
+            if (timeout <= 0) usage();
             break;
         case 0:
             if (strlen(options[optind].name) >= 3 &&

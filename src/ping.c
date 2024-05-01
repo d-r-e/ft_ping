@@ -74,7 +74,6 @@ void fill_icmp_packet(ping_pkt_t *pkt, unsigned int seq_number)
         pkt->msg[i] = '0' + (char)(i % 10);
     }
     pkt->msg[sizeof(pkt->msg) - 1] = '\0';
-
 }
 
 int send_ping(int sockfd, struct sockaddr_in *addr, ping_pkt_t *pkt)
@@ -130,14 +129,37 @@ struct sockaddr_in prepare_dest_addr(const char *ip)
     return dest_addr;
 }
 
-int ft_ping(const char *hostname, unsigned int ttl, long count, unsigned int timeout_ms, int verbose)
+void total_timeout_handler(int signo)
 {
-    struct timeval timeout = {timeout_ms / 1000, (timeout_ms % 1000) * 1000};
+    (void)signo;
+    fprintf(stderr, "Total timeout elapsed\n");
+    exit(1);
+}
+
+int setup_total_timeout(unsigned int timeout_seconds)
+{
+    struct itimerval timer;
+    timer.it_value.tv_sec = timeout_seconds;
+    timer.it_value.tv_usec = 0;
+    timer.it_interval.tv_sec = 0;
+    timer.it_interval.tv_usec = 0;
+
+    if (setitimer(ITIMER_REAL, &timer, NULL) == -1)
+    {
+        perror("Failed to set total timeout");
+        return -1;
+    }
+    return 0;
+}
+
+int ft_ping(const char *hostname, unsigned int ttl, long count, unsigned int timeout_seconds, int verbose)
+{
+    struct timeval timeout = {timeout_seconds, 0};
     unsigned int seq_number = 0;
     unsigned int received = 0;
-    struct sigaction act;
+    struct sigaction act, total_timeout_act;
     int sockfd;
-    
+
     (void)verbose;
     const char *ip = get_ip(hostname);
     if (!ip)
@@ -161,6 +183,16 @@ int ft_ping(const char *hostname, unsigned int ttl, long count, unsigned int tim
         alarm(1);
     }
 
+    memset(&total_timeout_act, 0, sizeof(total_timeout_act));
+    total_timeout_act.sa_handler = total_timeout_handler;
+    sigaction(SIGALRM, &total_timeout_act, NULL);
+
+    if (setup_total_timeout(timeout_seconds) < 0)
+    {
+        close(sockfd);
+        return 1;
+    }
+
     while (count--)
     {
         ping_pkt_t pkt;
@@ -180,7 +212,8 @@ int ft_ping(const char *hostname, unsigned int ttl, long count, unsigned int tim
         {
             printf("Request timeout for icmp_seq %d\n", seq_number);
         }
-
+        if (count == INT_MIN)
+            count = -1;
         if (count != 0)
             pause();
     }
