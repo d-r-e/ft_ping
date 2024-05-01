@@ -1,5 +1,12 @@
 #include <ft_ping.h>
 
+static volatile int keep_running = 1;
+
+static void sigint_handler(int sig)
+{
+    (void)sig;
+    keep_running = 0;
+}
 
 static int checksum(void *b, int len)
 {
@@ -164,6 +171,16 @@ int ft_ping(const char *hostname, unsigned int ttl, long count, int verbose)
     memset(&act, 0, sizeof(act));
     if (count != 1)
     {
+        struct sigaction act_int;
+        memset(&act_int, 0, sizeof(act_int));
+        act_int.sa_handler = sigint_handler;
+
+        if (sigaction(SIGINT, &act_int, NULL) == -1)
+        {
+            perror("Error setting SIGINT handler");
+            close(sockfd);
+            return 1;
+        }
         act.sa_handler = &sig_handler;
         sigaction(SIGALRM, &act, NULL);
         alarm(1);
@@ -171,6 +188,8 @@ int ft_ping(const char *hostname, unsigned int ttl, long count, int verbose)
 
     while (count--)
     {
+        if (!keep_running)
+            break;
         ping_pkt_t pkt;
         fill_icmp_packet(&pkt, seq_number++);
         gettimeofday(&pkt.timestamp, NULL);

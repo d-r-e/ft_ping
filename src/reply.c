@@ -59,20 +59,26 @@ int handle_reply(int sockfd, int verbose, ping_pkt_t *pkt, struct sockaddr_in *d
             gettimeofday(&recv_time, NULL);
             struct iphdr *ip_reply = (struct iphdr *)buffer;
             struct icmphdr *icmp_reply = (struct icmphdr *)(buffer + (ip_reply->ihl << 2));
-            unsigned int reply_ttl = ip_reply->ttl;
-            timersub(&recv_time, &pkt->timestamp, &rtt);
-            double rtt_ms = rtt.tv_sec * 1000.0 + rtt.tv_usec / 1000.0;
-            if (rtt_ms < stats->min_rtt)
-                stats->min_rtt = rtt_ms;
-            if (rtt_ms > stats->max_rtt)
-                stats->max_rtt = rtt_ms;
-            stats->total_rtt += rtt_ms;
-            stats->rtt_squared_sum += rtt_ms * rtt_ms;
-            stats->count++;
-            print_icmp_reply(icmp_reply, dest_addr, rd - (ip_reply->ihl << 2), reply_ttl, rtt);
-            if (verbose && icmp_reply->type != ICMP_ECHOREPLY && icmp_reply->type != ICMP_ECHO)
-                dump_ip_header(ip_reply);
+            if (icmp_reply->type == ICMP_ECHOREPLY)
+            { // Only process echo replies
+                unsigned int reply_ttl = ip_reply->ttl;
+                timersub(&recv_time, &pkt->timestamp, &rtt);
+                double rtt_ms = rtt.tv_sec * 1000.0 + rtt.tv_usec / 1000.0;
 
+                if (rtt_ms < stats->min_rtt)
+                    stats->min_rtt = rtt_ms;
+                if (rtt_ms > stats->max_rtt)
+                    stats->max_rtt = rtt_ms;
+                stats->total_rtt += rtt_ms;
+                stats->rtt_squared_sum += rtt_ms * rtt_ms;
+                stats->count++;
+
+                print_icmp_reply(icmp_reply, dest_addr, rd - (ip_reply->ihl << 2), reply_ttl, rtt);
+            }
+            else if (verbose)
+            { // Dump headers for all other packet types if verbose
+                dump_ip_header(ip_reply);
+            }
         }
         return 1;
     }
