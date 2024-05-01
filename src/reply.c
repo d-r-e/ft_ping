@@ -59,7 +59,7 @@ int handle_reply(int sockfd, int verbose, ping_pkt_t *pkt, struct sockaddr_in *d
             gettimeofday(&recv_time, NULL);
             struct iphdr *ip_reply = (struct iphdr *)buffer;
             struct icmphdr *icmp_reply = (struct icmphdr *)(buffer + (ip_reply->ihl << 2));
-            if (icmp_reply->type == ICMP_ECHOREPLY)
+            if (icmp_reply->type == ICMP_ECHOREPLY || icmp_reply->type == ICMP_ECHO)
             { // Only process echo replies
                 unsigned int reply_ttl = ip_reply->ttl;
                 timersub(&recv_time, &pkt->timestamp, &rtt);
@@ -76,7 +76,7 @@ int handle_reply(int sockfd, int verbose, ping_pkt_t *pkt, struct sockaddr_in *d
                 print_icmp_reply(icmp_reply, dest_addr, rd - (ip_reply->ihl << 2), reply_ttl, rtt);
             }
             else if (verbose)
-            { // Dump headers for all other packet types if verbose
+            {
                 dump_ip_header(ip_reply);
             }
         }

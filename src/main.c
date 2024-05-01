@@ -39,12 +39,7 @@ int main(int argc, char **argv)
         case 'v':
             verbose = 1;
             break;
-        // case 'w':
-        //     is_digit(optarg) ? timeout = atoi(optarg) : usage();
-        //     if (timeout <= 0) usage();
-        //     break;
         case 0:
-        // case ttl
             is_digit(optarg) ? ttl = atoi(optarg) : usage();
             break;
         default:
