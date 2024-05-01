@@ -1,37 +1,53 @@
 #!/bin/bash
-BIN=ft_ping
- make
-set -ex
 
-./$BIN -c 1 google.es
-./$BIN -c 1 8.8.8.8
-./$BIN -c 1 localhost
-./$BIN -c 1 192.168.1.1
-./$BIN -c 1 -v elpais.com
-./$BIN -c 2 -v google.es
-./$BIN -c 2 -v 8.8.8.8
-./$BIN -c 2 -v 192.168.1.1
-./$BIN -c 2 -v elpais.com
-exit 0
+make > /dev/null 2>&1
 
-/*
- * Old tests (without root) (not mandatory)
-*/
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+NC='\033[0m'
 
+print_result() {
+    if [ $1 -eq 0 ]; then
+        echo -e "${GREEN}PASS${NC}: $2"
+    else
+        echo -e "${RED}FAIL${NC}: $2"
+    fi
+}
 
-su darodrig -c "./ft_ping -c 2 google.es"
-su darodrig -c "./ft_ping -c 2 8.8.8.8"
-su darodrig -c "./ft_ping -c 2 localhost"
-su darodrig -c "./ft_ping -c 2 192.168.1.1"
-su darodrig -c "./ft_ping -c 2 elpais.com"
-exit 0
+test_failure() {
+    ./ft_ping $1 > /dev/null 2>&1
+    result=$?
+    if [ $result -ne 1 ]; then
+        print_result 1 "Expected failure for ft_ping $1, got $result"
+    else
+        print_result 0 "Expected failure for ft_ping $1"
+    fi
+}
 
-#  internship 11.91
-# drquine 12.22
-# nm otool 12.66
-# dslr
-# linear regression
-# snow crash
-# ft ping
-# rainfall
-# multilayer perceptron
+test_success() {
+    ./ft_ping $1 > /dev/null 2>&1
+    result=$?
+    # Expect exit status 0 for success
+    if [ $result -ne 0 ]; then
+        print_result 1 "Expected success for ft_ping $1, got $result"
+    else
+        print_result 0 "Expected success for ft_ping $1"
+    fi
+}
+
+echo "Starting tests for ft_ping..."
+
+echo "Testing incorrect usage scenarios..."
+test_failure "-z"
+test_failure "--bad-option"
+test_failure ""
+
+# Test for correct usage with different options
+echo "Testing correct usage scenarios..."
+test_success "-c 5 google.com"     # Valid count option
+test_success "-w 500 google.com"   # Valid timeout option
+test_success "-V"                  # Version information
+test_success "-v -c 3 google.com"  # Verbose mode with count
+test_success "--ttl 50 google.com" # Valid TTL option
+
+echo "Tests complete."

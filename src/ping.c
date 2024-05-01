@@ -1,122 +1,83 @@
-#include "../inc/ft_ping.h"
+#include <ft_ping.h>
 
-// uint16_t
-// checksum(uint16_t *addr, size_t len)
-// {
-// 	int nleft, sum;
-// 	uint16_t *w;
-// 	union
-// 	{
-// 		uint16_t us;
-// 		unsigned char uc[2];
-// 	} last;
-// 	uint16_t answer;
-
-// 	nleft = len;
-// 	sum = 0;
-// 	w = addr;
-
-// 	/*
-// 	 * The algorithm is simple, using a 32 bit accumulator (sum), we add
-// 	 * sequential 16 bit words to it, and at the end, fold back all the
-// 	 * carry bits from the top 16 bits into the lower 16 bits.
-// 	 */
-// 	while (nleft > 1)
-// 	{
-// 		sum += *w++;
-// 		nleft -= 2;
-// 	}
-
-// 	/* append an odd byte for padding, if necessary */
-// 	if (nleft == 1)
-// 	{
-// 		last.uc[0] = *(unsigned char *)w;
-// 		last.uc[1] = 0;
-// 		sum += last.us;
-// 	}
-
-// 	/* add back carry outs from top 16 bits to low 16 bits */
-// 	sum = (sum >> 16) + (sum & 0xffff); /* add hi 16 to low 16 */
-// 	sum += (sum >> 16);					/* add carry */
-// 	answer = ~sum;						/* 1st compliment && truncate to 16 bits */
-// 	return (answer);
-// }
-
-static unsigned short checksum(void *address, size_t len)
+int checksum(void *b, int len)
 {
-	unsigned short *src;
-	unsigned long sum;
+    unsigned short *buf = b;
+    unsigned int sum = 0;
+    unsigned short result;
 
-	src = (unsigned short *)address;
-	sum = 0;
-	while (len > 1)
-	{
-		sum += *src;
-		src++;
-		len -= sizeof(short);
-	}
-	if (len)
-		sum += *(unsigned char *)src;
-	sum = (sum >> 16) + (sum & 0xffff);
-	sum += (sum >> 16);
-	return ((unsigned short)~sum);
+    for (sum = 0; len > 1; len -= 2)
+        sum += *buf++;
+    if (len == 1)
+        sum += *(unsigned char *)buf;
+    sum = (sum >> 16) + (sum & 0xffff);
+    sum += (sum >> 16);
+    result = ~sum;
+    return result;
 }
 
-/**
- * @brief Creates icmp packet ready to be sent
- * The content of the message is the timestamp, plus an arbitrary amount of data
- * @param packet, pointer to the packet to be filled
- * @param current_time 
- */
-static void build_ping_packet(struct ping_pkt *packet, struct timeval current_time)
+void sig_handler(int signo)
 {
-	ft_bzero(packet, sizeof(packet));
-	packet->icmphdr.type = ICMP_ECHO;
-	packet->icmphdr.code = 0;
-	packet->icmphdr.un.echo.id = SWAP16(getpid());
-	packet->icmphdr.un.echo.sequence = SWAP16(g_state.p_transmitted);
-	(void)current_time;
-	ft_memcpy(&packet->msg, &current_time.tv_sec, sizeof(current_time.tv_sec));
-	for (unsigned char i = 0; i < 40; ++i)
-		packet->msg[i + 16] = i;
-	packet->icmphdr.checksum = (checksum(&packet->icmphdr, PING_SZ));
-	// print_packet_fields(*packet);
+    if (signo == SIGALRM)
+        alarm(1);
 }
 
-/**
- * @brief main function of the algorithm
- * the function sends the packet, schedules an alarm for the next one
- * and then listens awaiting for the reply
- * 
- * @return int 
- */
-int ft_ping()
+const char *get_ip(const char *hostname)
 {
-	ssize_t read;
-	struct ping_pkt pckt = {};
+    static char ipstr[INET6_ADDRSTRLEN];
+    struct addrinfo hints, *res, *p;
+    int status;
+    void *addr;
 
-	ft_bzero(&pckt, sizeof(struct ping_pkt));
-	if (!g_state.loop)
-		return (0);
-	gettimeofday(&g_state.t0, NULL);
-	build_ping_packet(&pckt, g_state.t0);
-	read = sendto(g_state.sockfd, \
-			(void *)&pckt, sizeof(pckt), 0, \
-			(struct sockaddr *)((g_state.addr_list)->ai_addr), \
-			sizeof(*(g_state.addr_list)->ai_addr));
-	if (read <= 0)
-	{
-		printf("%s: error: sendto failed\n", BIN);
-		return (-1);
-	}
-	g_state.p_transmitted++;
-	if (g_state.f_opt)
-	{
-		printf(".");
-	}
-	if (g_state.f_opt == 0)
-		alarm(1);
-	receive_reply();
-	return (0);
+    memset(&hints, 0, sizeof(hints));
+    hints.ai_family = AF_UNSPEC; // AF_INET for IPv4 only, AF_INET6 for IPv6, AF_UNSPEC for any
+    hints.ai_socktype = SOCK_STREAM;
+
+    if ((status = getaddrinfo(hostname, NULL, &hints, &res)) != 0)
+    {
+        fprintf(stderr, "getaddrinfo: %s\n", gai_strerror(status));
+        return NULL;
+    }
+
+    for (p = res; p != NULL; p = p->ai_next)
+    {
+        if (p->ai_family == AF_INET)
+        { // Check for IPv4
+            struct sockaddr_in *ipv4 = (struct sockaddr_in *)p->ai_addr;
+            addr = &(ipv4->sin_addr);
+        }
+        else
+        { // IPv6
+            struct sockaddr_in6 *ipv6 = (struct sockaddr_in6 *)p->ai_addr;
+            addr = &(ipv6->sin6_addr);
+        }
+
+        // Convert the IP to a string and return
+        inet_ntop(p->ai_family, addr, ipstr, sizeof(ipstr));
+        freeaddrinfo(res); // Free the linked list
+        return ipstr;
+    }
+
+    freeaddrinfo(res); // Free the linked list
+    return NULL;       // Failed to resolve
 }
 
+int ft_ping(const char *hostname, unsigned int ttl, long count, unsigned int timeout)
+{
+    (void)ttl;
+    (void)timeout;
+    const char *ip = get_ip(hostname);
+    struct sigaction act;
+
+    memset(&act, 0, sizeof(act));
+    act.sa_handler = &sig_handler;
+    sigaction(SIGALRM, &act, NULL);
+    alarm(1);
+
+    printf("PING %s (%s) 56 data bytes\n", hostname, ip);
+    while (count--)
+    {
+        pause();
+    }
+    return 0;
+}
