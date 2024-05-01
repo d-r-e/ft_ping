@@ -9,8 +9,13 @@ int handle_reply(int sockfd, struct sockaddr_in *dest_addr, struct timeval *time
     int ret = select(sockfd + 1, &readfds, NULL, NULL, timeout);
     if (ret == -1)
     {
-        perror("Select failed");
-        return -1;
+        if (errno == EINTR)
+            perror("Select was interrupted by a signal");
+        else
+        {
+            perror("Select failed");
+            return -1;
+        }
     }
     else if (ret)
     {
@@ -30,10 +35,19 @@ int handle_reply(int sockfd, struct sockaddr_in *dest_addr, struct timeval *time
 
 void print_icmp_reply(struct icmphdr *icmp_reply, struct sockaddr_in *addr, size_t read_bytes, size_t reply_ttl)
 {
-    printf("%ld bytes from %s: icmp_seq=%d ttl=%ld time=%.2f ms\n",
-              read_bytes,
-           inet_ntoa(addr->sin_addr),
-           ntohs(icmp_reply->un.echo.sequence),
-              reply_ttl,
-           0.0);
+    if (icmp_reply->type == ICMP_ECHOREPLY || icmp_reply->type == ICMP_ECHO)
+        printf("%ld bytes from %s: icmp_seq=%d ttl=%ld time=%.2f ms\n",
+                read_bytes,
+            inet_ntoa(addr->sin_addr),
+            ntohs(icmp_reply->un.echo.sequence),
+                reply_ttl,
+            0.0);
+    else if (icmp_reply->type == ICMP_DEST_UNREACH)
+        printf("Destination unreachable\n");
+    else if (icmp_reply->type == ICMP_TIME_EXCEEDED)
+        printf("%ld bytes from %s: Time to live exceeded\n",
+                read_bytes,
+            inet_ntoa(addr->sin_addr));
+    else
+        printf("Unknown type %d\n", icmp_reply->type);
 }

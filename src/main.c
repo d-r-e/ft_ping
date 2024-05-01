@@ -5,7 +5,7 @@ int main(int argc, char **argv)
     char c;
     int verbose = 0;
     unsigned long icmp_count = -1;
-    int timeout = -1;
+    // int timeout = -1;
     unsigned int ttl = DEFAULT_TTL;
     char *hostname;
     
@@ -15,14 +15,14 @@ int main(int argc, char **argv)
         {"version", no_argument, 0, 'V'},
         {"verbose", no_argument, 0, 'v'},
         {"count", required_argument, 0, 'c'},
-        {"timeout", required_argument, 0, 'w'},
+        // {"timeout", required_argument, 0, 'w'},
         {"ttl", required_argument, 0, 0},
         {0, 0, 0, 0}};
 
     if (argc < 2)
         usage();
 
-    while ((c = getopt_long(argc, argv, "vc:w:V?", options, NULL)) != -1)
+    while ((c = getopt_long(argc, argv, "vc:V?", options, NULL)) != -1)
     {
         switch (c)
         {
@@ -38,14 +38,13 @@ int main(int argc, char **argv)
         case 'v':
             verbose = 1;
             break;
-        case 'w':
-            is_digit(optarg) ? timeout = atoi(optarg) : usage();
-            if (timeout <= 0) usage();
-            break;
+        // case 'w':
+        //     is_digit(optarg) ? timeout = atoi(optarg) : usage();
+        //     if (timeout <= 0) usage();
+        //     break;
         case 0:
-            if (strlen(options[optind].name) >= 3 &&
-                !strncmp(options[optind].name, "ttl", 3) && is_digit(optarg))
-                ttl = atoi(optarg);
+        // case ttl
+            is_digit(optarg) ? ttl = atoi(optarg) : usage();
             break;
         default:
             usage();
@@ -57,7 +56,7 @@ int main(int argc, char **argv)
     while (optind < argc)
     {
         hostname = argv[optind];
-        ft_ping(hostname, ttl, icmp_count, timeout, verbose);
+        ft_ping(hostname, ttl, icmp_count, verbose);
         optind++;
     }
 }

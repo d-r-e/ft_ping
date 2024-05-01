@@ -16,6 +16,7 @@
 #include <sys/socket.h>
 #include <sys/time.h>
 #include <unistd.h>
+#include <errno.h>
 
 #define DEFAULT_TTL 64
 #define PING_PKT_SIZE 64
@@ -32,7 +33,7 @@ void help(void);
 
 int is_digit(const char *str);
 
-int ft_ping(const char *hostname, unsigned int ttl, long count, unsigned int timeout_ms, int verbose);
+int ft_ping(const char *hostname, unsigned int ttl, long count, int verbose);
 void print_icmp_reply(struct icmphdr *icmp_reply, struct sockaddr_in *addr, size_t read_bytes, size_t reply_ttl);
 int handle_reply(int sockfd, struct sockaddr_in *dest_addr, struct timeval *timeout);
 void print_stats();

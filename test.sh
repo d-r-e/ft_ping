@@ -48,7 +48,8 @@ echo "Testing correct usage scenarios..."
 test_success "-V"                           # Version information
 test_success "-V argument another_arg"      # Version information
 test_success "-c 1 google.com"              # Valid count option
-test_success "-w 500 -c 1 google.com"       # Valid timeout option
+test_success "-c 1 127.0.0.1"       # Valid timeout option
+test_success "-c 1 localhost"       # Valid timeout option
 test_success "-v -c 1 google.com"           # Verbose mode with count
 test_success "--ttl 50 -c1 google.com"      # Valid TTL option
 test_success "-c 1 --ttl 1 google.com"      # Valid TTL option

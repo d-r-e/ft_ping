@@ -23,6 +23,7 @@ void sig_handler(int signo)
 {
     if (signo == SIGALRM)
         alarm(1);
+
 }
 
 const char *get_ip(const char *hostname)
@@ -83,7 +84,7 @@ int send_ping(int sockfd, struct sockaddr_in *addr, ping_pkt_t *pkt)
 {
     unsigned int sequence = ntohs(pkt->hdr.un.echo.sequence);
     sequence++;
-    pkt->hdr.un.echo.sequence = htons(sequence);
+    pkt->hdr.un.echo.sequence = htons(sequence - 1);
     pkt->hdr.checksum = 0;
     pkt->hdr.checksum = checksum(pkt, PING_PKT_SIZE);
 
@@ -132,47 +133,13 @@ struct sockaddr_in prepare_dest_addr(const char *ip)
     return dest_addr;
 }
 
-void total_timeout_handler(int signo)
-{
-    (void)signo;
-    fprintf(stderr, "Total timeout elapsed\n");
-    exit(1);
-}
 
-int setup_total_timeout(unsigned int timeout_seconds)
+int ft_ping(const char *hostname, unsigned int ttl, long count, int verbose)
 {
-    struct itimerval timer;
-    timer.it_value.tv_sec = timeout_seconds;
-    timer.it_value.tv_usec = 0;
-    timer.it_interval.tv_sec = 0;
-    timer.it_interval.tv_usec = 0;
-
-    if (setitimer(ITIMER_REAL, &timer, NULL) == -1)
-    {
-        perror("Failed to set total timeout");
-        return -1;
-    }
-    return 0;
-}
-
-void sigalrm_handler(int signo)
-{
-    (void)signo;
-    static int ping_count = 0;
-    if (ping_count > 0)
-    {
-        alarm(1);
-    }
-    ping_count++;
-    printf("Alarm %d\n", ping_count);
-}
-
-int ft_ping(const char *hostname, unsigned int ttl, long count, unsigned int timeout_seconds, int verbose)
-{
-    struct timeval timeout = {timeout_seconds, 0};
+    struct timeval timeout = {5, 0};
     unsigned int seq_number = 0;
 
-    struct sigaction act, total_timeout_act;
+    struct sigaction act;
     int sockfd;
 
     (void)verbose;
@@ -198,10 +165,6 @@ int ft_ping(const char *hostname, unsigned int ttl, long count, unsigned int tim
         alarm(1);
     }
 
-    (void)timeout_seconds;
-    (void)total_timeout_act;
-
-
     while (count--)
     {
         ping_pkt_t pkt;
@@ -217,10 +180,7 @@ int ft_ping(const char *hostname, unsigned int ttl, long count, unsigned int tim
         {
             total_received++;
         }
-        else if (reply_status == 0)
-        {
-            printf("Request timeout for icmp_seq %d\n", seq_number);
-        }
+
         if (count == INT_MIN)
             count = -1;
         if (count != 0)
