@@ -1,5 +1,8 @@
 #include <ft_ping.h>
 
+unsigned int total_sent = 0;
+unsigned int total_received = 0;
+
 int checksum(void *b, int len)
 {
     unsigned short *buf = b;
@@ -90,7 +93,7 @@ int send_ping(int sockfd, struct sockaddr_in *addr, ping_pkt_t *pkt)
         perror("Failed to send ping");
         return -1;
     }
-
+    total_sent++;
     return 0;
 }
 
@@ -152,11 +155,23 @@ int setup_total_timeout(unsigned int timeout_seconds)
     return 0;
 }
 
+void sigalrm_handler(int signo)
+{
+    (void)signo;
+    static int ping_count = 0;
+    if (ping_count > 0)
+    {
+        alarm(1);
+    }
+    ping_count++;
+    printf("Alarm %d\n", ping_count);
+}
+
 int ft_ping(const char *hostname, unsigned int ttl, long count, unsigned int timeout_seconds, int verbose)
 {
     struct timeval timeout = {timeout_seconds, 0};
     unsigned int seq_number = 0;
-    unsigned int received = 0;
+
     struct sigaction act, total_timeout_act;
     int sockfd;
 
@@ -183,15 +198,9 @@ int ft_ping(const char *hostname, unsigned int ttl, long count, unsigned int tim
         alarm(1);
     }
 
-    memset(&total_timeout_act, 0, sizeof(total_timeout_act));
-    total_timeout_act.sa_handler = total_timeout_handler;
-    sigaction(SIGALRM, &total_timeout_act, NULL);
+    (void)timeout_seconds;
+    (void)total_timeout_act;
 
-    if (setup_total_timeout(timeout_seconds) < 0)
-    {
-        close(sockfd);
-        return 1;
-    }
 
     while (count--)
     {
@@ -206,7 +215,7 @@ int ft_ping(const char *hostname, unsigned int ttl, long count, unsigned int tim
         int reply_status = handle_reply(sockfd, &dest_addr, &timeout);
         if (reply_status == 1)
         {
-            received++;
+            total_received++;
         }
         else if (reply_status == 0)
         {
@@ -217,7 +226,7 @@ int ft_ping(const char *hostname, unsigned int ttl, long count, unsigned int tim
         if (count != 0)
             pause();
     }
-
+    print_stats();
     close(sockfd);
     return 0;
 }

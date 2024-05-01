@@ -1,3 +1,6 @@
+#ifndef FT_PING_H
+#define FT_PING_H
+
 #include <arpa/inet.h>
 #include <ctype.h>
 #include <getopt.h>
@@ -32,3 +35,10 @@ int is_digit(const char *str);
 int ft_ping(const char *hostname, unsigned int ttl, long count, unsigned int timeout_ms, int verbose);
 void print_icmp_reply(struct icmphdr *icmp_reply, struct sockaddr_in *addr, size_t read_bytes, size_t reply_ttl);
 int handle_reply(int sockfd, struct sockaddr_in *dest_addr, struct timeval *timeout);
+void print_stats();
+
+// Global variables
+extern unsigned int total_sent;
+extern unsigned int total_received;
+
+#endif // FT_PING_H

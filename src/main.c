@@ -8,6 +8,7 @@ int main(int argc, char **argv)
     int timeout = -1;
     unsigned int ttl = DEFAULT_TTL;
     char *hostname;
+    
 
     static struct option options[] = {
         {"help", no_argument, 0, '?'},

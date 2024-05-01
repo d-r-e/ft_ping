@@ -1,10 +1,10 @@
 #include <ft_ping.h>
 
 
-double pow(double x, double y){
-    while (y > 1){
-        x *= x;
-        y--;
-    }
-    return x;
+void print_stats()
+{
+    printf("\n--- Ping statistics ---\n");
+    printf("%u packets transmitted, %u received, %.1f%% packet loss\n",
+           total_sent, total_received,
+           ((total_sent - total_received) / (double)total_sent) * 100.0);
 }

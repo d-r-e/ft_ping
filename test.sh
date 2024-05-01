@@ -52,6 +52,7 @@ test_success "-w 500 -c 1 google.com"       # Valid timeout option
 test_success "-v -c 1 google.com"           # Verbose mode with count
 test_success "--ttl 50 -c1 google.com"      # Valid TTL option
 test_success "-c 1 --ttl 1 google.com"      # Valid TTL option
+test_success "-c 2 localhost"         # Valid TTL option
 test_success "-c 1 google.com google.es"    # Multiple hosts
 
 echo "Tests complete."

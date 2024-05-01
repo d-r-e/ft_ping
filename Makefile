@@ -12,11 +12,9 @@ $(NAME): $(OBJ) $(LIBFT)
 	gcc $(FLAGS) -c $< -o $@ -I $(INC)
 
 clean:
-	$(MAKE) clean -C libft
 	rm -f $(OBJ)
 
 fclean: clean
-	$(MAKE) fclean -C libft
 	rm -f $(NAME)
 
 re: fclean all
