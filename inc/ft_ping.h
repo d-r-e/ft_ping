@@ -14,6 +14,15 @@
 #include <sys/time.h>
 #include <unistd.h>
 
+#define DEFAULT_TTL 64
+#define PING_PKT_SIZE 64
+
+typedef struct
+{
+    struct icmphdr hdr;
+    char msg[PING_PKT_SIZE - sizeof(struct icmphdr)];
+} ping_pkt_t;
+
 void usage(void);
 void version(void);
 void help(void);
@@ -21,5 +30,3 @@ void help(void);
 int is_digit(const char *str);
 
 int ft_ping(const char *, unsigned int ttl, long count, unsigned int timeout);
-
-#define DEFAULT_TTL 64

@@ -1,7 +1,12 @@
 {
     "files.associations": {
+        "README": "markdown",
         "ip_icmp.h": "c",
         "ft_ping.h": "c",
-        "netdb.h": "c"
+        "netdb.h": "c",
+        "inet.h": "c",
+        "argp.h": "c",
+        "getopt.h": "c",
+        "math.h": "c"
     }
 }

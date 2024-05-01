@@ -42,42 +42,111 @@ const char *get_ip(const char *hostname)
     for (p = res; p != NULL; p = p->ai_next)
     {
         if (p->ai_family == AF_INET)
-        { // Check for IPv4
+        {
             struct sockaddr_in *ipv4 = (struct sockaddr_in *)p->ai_addr;
             addr = &(ipv4->sin_addr);
         }
         else
-        { // IPv6
+        {
             struct sockaddr_in6 *ipv6 = (struct sockaddr_in6 *)p->ai_addr;
             addr = &(ipv6->sin6_addr);
         }
 
-        // Convert the IP to a string and return
         inet_ntop(p->ai_family, addr, ipstr, sizeof(ipstr));
-        freeaddrinfo(res); // Free the linked list
+        freeaddrinfo(res);
         return ipstr;
     }
 
-    freeaddrinfo(res); // Free the linked list
-    return NULL;       // Failed to resolve
+    freeaddrinfo(res);
+    return NULL;
 }
 
-int ft_ping(const char *hostname, unsigned int ttl, long count, unsigned int timeout)
+void fill_icmp_packet(ping_pkt_t *pkt)
+{
+    memset(pkt, 0, PING_PKT_SIZE);
+    pkt->hdr.type = ICMP_ECHO;
+    pkt->hdr.un.echo.id = getpid() & 0xFFFF;
+    for (long unsigned int i = 0; i < sizeof(pkt->msg) - 1; i++)
+        pkt->msg[i] = i + '0';
+    pkt->msg[sizeof(pkt->msg) - 1] = 0;
+    pkt->hdr.checksum = checksum(pkt, PING_PKT_SIZE);
+}
+
+int send_ping(int sockfd, struct sockaddr_in *addr, ping_pkt_t *pkt)
+{
+    pkt->hdr.un.echo.sequence++;
+    pkt->hdr.checksum = 0;
+    pkt->hdr.checksum = checksum(pkt, PING_PKT_SIZE);
+
+    int sent = sendto(sockfd, pkt, PING_PKT_SIZE, 0, (struct sockaddr *)addr, sizeof(*addr));
+    if (sent <= 0)
+    {
+        perror("Failed to send ping");
+        return -1;
+    }
+
+    return 0;
+}
+
+int ft_ping(const char *hostname, unsigned int ttl, long count, unsigned int timeout_ms)
 {
     (void)ttl;
-    (void)timeout;
-    const char *ip = get_ip(hostname);
-    struct sigaction act;
+    struct timeval timeout = {timeout_ms / 1000, (timeout_ms % 1000) * 1000};
 
+    const char *ip = get_ip(hostname);
+    if (!ip)
+    {
+        fprintf(stderr, "Failed to resolve IP for hostname: %s\n", hostname);
+        return 1;
+    }
+
+    int sockfd = socket(AF_INET, SOCK_RAW, IPPROTO_ICMP);
+    if (sockfd < 0)
+    {
+        perror("Socket creation failed");
+        return 1;
+    }
+
+    struct sigaction act;
     memset(&act, 0, sizeof(act));
     act.sa_handler = &sig_handler;
     sigaction(SIGALRM, &act, NULL);
     alarm(1);
 
-    printf("PING %s (%s) 56 data bytes\n", hostname, ip);
+    printf("PING %s (%s) %d data bytes\n", hostname, ip, PING_PKT_SIZE);
+    struct sockaddr_in dest_addr;
+    memset(&dest_addr, 0, sizeof(dest_addr));
+    dest_addr.sin_family = AF_INET;
+    inet_pton(AF_INET, ip, &dest_addr.sin_addr);
+
     while (count--)
     {
+        ping_pkt_t pkt;
+        fill_icmp_packet(&pkt);
+        if (send_ping(sockfd, &dest_addr, &pkt) == -1)
+        {
+            close(sockfd);
+            return 1;
+        }
+
+        fd_set readfds;
+        FD_ZERO(&readfds);
+        FD_SET(sockfd, &readfds);
+
+        int ret = select(sockfd + 1, &readfds, NULL, NULL, &timeout);
+        if (ret == -1)
+        {
+            perror("Select failed");
+            close(sockfd);
+            return 1;
+        }
+        else if (ret)
+        {
+            printf("Received packet from %s\n", ip);
+        }
         pause();
     }
+
+    close(sockfd);
     return 0;
 }

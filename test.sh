@@ -44,10 +44,10 @@ test_failure ""
 
 # Test for correct usage with different options
 echo "Testing correct usage scenarios..."
-test_success "-c 5 google.com"     # Valid count option
-test_success "-w 500 google.com"   # Valid timeout option
 test_success "-V"                  # Version information
+test_success "-c 2 google.com"     # Valid count option
+test_success "-w 500 -c 2 google.com"   # Valid timeout option
 test_success "-v -c 3 google.com"  # Verbose mode with count
-test_success "--ttl 50 google.com" # Valid TTL option
+test_success "--ttl 50 -c2 google.com" # Valid TTL option
 
 echo "Tests complete."
