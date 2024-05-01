@@ -3,6 +3,7 @@
 int main(int argc, char **argv)
 {
     char c;
+    int ret = 0;
     int verbose = 0;
     unsigned long icmp_count = -1;
     // int timeout = -1;
@@ -56,7 +57,8 @@ int main(int argc, char **argv)
     while (optind < argc)
     {
         hostname = argv[optind];
-        ft_ping(hostname, ttl, icmp_count, verbose);
+        ret += ft_ping(hostname, ttl, icmp_count, verbose);
         optind++;
     }
+    return ret;
 }

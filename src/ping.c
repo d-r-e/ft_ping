@@ -1,7 +1,7 @@
 #include <ft_ping.h>
 
 
-int checksum(void *b, int len)
+static int checksum(void *b, int len)
 {
     unsigned short *buf = b;
     unsigned int sum = 0;
@@ -17,14 +17,14 @@ int checksum(void *b, int len)
     return result;
 }
 
-void sig_handler(int signo)
+static void sig_handler(int signo)
 {
     if (signo == SIGALRM)
         alarm(1);
 
 }
 
-const char *get_ip(const char *hostname)
+static const char *get_ip(const char *hostname)
 {
     static char ipstr[INET6_ADDRSTRLEN];
     struct addrinfo hints, *res, *p;
@@ -63,7 +63,7 @@ const char *get_ip(const char *hostname)
     return ret_ip;
 }
 
-void fill_icmp_packet(ping_pkt_t *pkt, unsigned int seq_number)
+static void fill_icmp_packet(ping_pkt_t *pkt, unsigned int seq_number)
 {
     memset(pkt, 0, PING_PKT_SIZE);
     pkt->hdr.type = ICMP_ECHO;
@@ -131,13 +131,19 @@ static struct sockaddr_in prepare_dest_addr(const char *ip)
 }
 
 
+/// @brief Main function for ft_ping
+/// @param hostname 
+/// @param ttl 
+/// @param count 
+/// @param verbose 
+/// @return 
 int ft_ping(const char *hostname, unsigned int ttl, long count, int verbose)
 {
-    struct timeval timeout = {5, 0};
+    struct timeval timeout = {1, 0};
     unsigned int seq_number = 0;
-
     unsigned int total_sent = 0;
     unsigned int total_received = 0;
+    ping_stats_t stats = {INFINITY, 0, 0, 0, 0};
 
     struct sigaction act;
     int sockfd;
@@ -149,9 +155,7 @@ int ft_ping(const char *hostname, unsigned int ttl, long count, int verbose)
         fprintf(stderr, "Failed to resolve IP for hostname: %s\n", hostname);
         return 1;
     }
-
-    sockfd = setup_socket(ttl);
-    if (sockfd < 0)
+    if ((sockfd = setup_socket(ttl)) < 0)
         return 1;
 
     printf("PING %s (%s) %ld data bytes\n", hostname, ip, PING_PKT_SIZE - sizeof(struct icmphdr));
@@ -177,7 +181,7 @@ int ft_ping(const char *hostname, unsigned int ttl, long count, int verbose)
         } else {
             total_sent++;
         }
-        int reply_status = handle_reply(sockfd, &pkt, &dest_addr, &timeout);
+        int reply_status = handle_reply(sockfd, verbose, &pkt, &dest_addr, &timeout, &stats);
         if (reply_status == 1)
         {
             total_received++;
@@ -188,9 +192,9 @@ int ft_ping(const char *hostname, unsigned int ttl, long count, int verbose)
         if (count != 0)
             pause();
     }
-    print_stats(hostname, total_sent, total_received);
+    print_stats(hostname, total_sent, total_received, &stats);
     total_sent = 0;
     total_received = 0;
     close(sockfd);
-    return total_received == total_sent;
+    return total_received == total_sent ? 0 : 1;
 }

@@ -1,15 +1,15 @@
 NAME=ft_ping
-SRC=src/main.c src/help.c src/ping.c src/util.c src/stat.c src/reply.c
+SRC=src/main.c src/help.c src/ping.c src/util.c src/reply.c
 OBJ = $(SRC:.c=.o)
 FLAGS= -g3 -O2 -Wall -Wextra -Werror #  -Wformat-security
 INC=inc
 
 $(NAME): $(OBJ) $(LIBFT) 
-	gcc $(FLAGS) $(OBJ) -I $(INC) -o $(NAME)
+	gcc $(FLAGS) $(OBJ) -I $(INC) -o $(NAME) -lm
 
 
 %.o: %.c $(INC)
-	gcc $(FLAGS) -c $< -o $@ -I $(INC)
+	gcc $(FLAGS) -c $< -o $@ -I $(INC) -lm
 
 clean:
 	rm -f $(OBJ)
