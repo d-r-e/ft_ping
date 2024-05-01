@@ -7,6 +7,7 @@
         "inet.h": "c",
         "argp.h": "c",
         "getopt.h": "c",
-        "math.h": "c"
+        "math.h": "c",
+        "unistd.h": "c"
     }
 }
