@@ -115,10 +115,16 @@ void print_icmp_reply(struct icmphdr *icmp_reply, struct sockaddr_in *addr, size
 void print_stats(const char *hostname, unsigned int total_sent, unsigned int total_received, ping_stats_t *stats)
 {
     printf("--- %s ping statistics ---\n", hostname);
+    double packet_loss = total_sent > 0 ? ((total_sent - total_received) / (double)total_sent) * 100.0 : 0.0;
     printf("%u packets transmitted, %u received, %.1f%% packet loss\n",
-           total_sent, total_received,
-           ((total_sent - total_received) / (double)total_sent) * 100.0);
+           total_sent, total_received, packet_loss);
+
+    double avg_rtt = stats->count > 0 ? stats->total_rtt / stats->count : 0.0;
+    double variance = stats->count > 0 ? (stats->rtt_squared_sum / stats->count) - (avg_rtt * avg_rtt) : 0.0;
+    double stddev = sqrt(variance);
     printf("round-trip min/avg/max/stddev = %.3f/%.3f/%.3f/%.3f ms\n",
-           stats->min_rtt, stats->total_rtt / stats->count, stats->max_rtt,
-           sqrt((stats->rtt_squared_sum - stats->total_rtt * stats->total_rtt / stats->count) / stats->count));
+           isfinite(stats->min_rtt) ? stats->min_rtt : 0.0,
+           isfinite(avg_rtt) ? avg_rtt : 0.0,
+           isfinite(stats->max_rtt) ? stats->max_rtt : 0.0,
+           isfinite(stddev) ? stddev : 0.0);
 }
