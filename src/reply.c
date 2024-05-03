@@ -55,7 +55,7 @@ int handle_reply(int sockfd, int verbose, ping_pkt_t *pkt, struct sockaddr_in *d
         uint8_t buffer[sizeof(struct iphdr) + sizeof(ping_pkt_t)];
         ssize_t rd = read(sockfd, buffer, sizeof(buffer));
         unsigned int reply_ttl;
-        if (rd > 0)
+        if (rd > 0 && (size_t)rd >= (size_t)(sizeof(ping_pkt_t)))
         {
             gettimeofday(&recv_time, NULL);
             struct iphdr *ip_reply = (struct iphdr *)buffer;
