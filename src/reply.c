@@ -75,12 +75,13 @@ int handle_reply(int sockfd, int verbose, ping_pkt_t *pkt, struct sockaddr_in *d
                 stats->count++;
 
                 ret = 1;
-            }
-            reply_ttl = 0;
-            print_icmp_reply(icmp_reply, dest_addr, rd - (ip_reply->ihl << 2), reply_ttl, rtt);
-            if (verbose)
-            {
+            } else {
                 ret = 0;
+                reply_ttl = 0;
+            }
+            print_icmp_reply(icmp_reply, dest_addr, rd - (ip_reply->ihl << 2), reply_ttl, rtt);
+            if (verbose && !ret)
+            {
                 dump_ip_header(ip_reply);
             }
         }
