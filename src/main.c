@@ -6,7 +6,6 @@ int main(int argc, char **argv)
     int ret = 0;
     int verbose = 0;
     unsigned long icmp_count = -1;
-    // int timeout = -1;
     unsigned int ttl = DEFAULT_TTL;
     char *hostname;
     
@@ -16,7 +15,6 @@ int main(int argc, char **argv)
         {"version", no_argument, 0, 'V'},
         {"verbose", no_argument, 0, 'v'},
         {"count", required_argument, 0, 'c'},
-        // {"timeout", required_argument, 0, 'w'},
         {"ttl", required_argument, 0, 0},
         {0, 0, 0, 0}};
 
