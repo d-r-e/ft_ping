@@ -38,7 +38,7 @@ static void dump_ip_header(struct iphdr *ip)
 /// @param dest_addr
 /// @param timeout
 /// @param stats
-/// @return
+/// @return 1 if success, 0 otherwise
 int handle_reply(int sockfd, int verbose, ping_pkt_t *pkt, struct sockaddr_in *dest_addr, struct timeval *timeout, ping_stats_t *stats)
 {
     fd_set readfds;
@@ -49,11 +49,12 @@ int handle_reply(int sockfd, int verbose, ping_pkt_t *pkt, struct sockaddr_in *d
 
     int ret = select(sockfd + 1, &readfds, NULL, NULL, timeout);
     if (ret == -1)
-        return -1;
+        return ret;
     else if (ret)
     {
         uint8_t buffer[sizeof(struct iphdr) + sizeof(ping_pkt_t)];
         ssize_t rd = read(sockfd, buffer, sizeof(buffer));
+        unsigned int reply_ttl;
         if (rd > 0)
         {
             gettimeofday(&recv_time, NULL);
@@ -61,7 +62,7 @@ int handle_reply(int sockfd, int verbose, ping_pkt_t *pkt, struct sockaddr_in *d
             struct icmphdr *icmp_reply = (struct icmphdr *)(buffer + (ip_reply->ihl << 2));
             if (icmp_reply->type == ICMP_ECHOREPLY || icmp_reply->type == ICMP_ECHO)
             { // Only process echo replies
-                unsigned int reply_ttl = ip_reply->ttl;
+                reply_ttl = ip_reply->ttl;
                 timersub(&recv_time, &pkt->timestamp, &rtt);
                 double rtt_ms = rtt.tv_sec * 1000.0 + rtt.tv_usec / 1000.0;
 
@@ -73,14 +74,17 @@ int handle_reply(int sockfd, int verbose, ping_pkt_t *pkt, struct sockaddr_in *d
                 stats->rtt_squared_sum += rtt_ms * rtt_ms;
                 stats->count++;
 
-                print_icmp_reply(icmp_reply, dest_addr, rd - (ip_reply->ihl << 2), reply_ttl, rtt);
+                ret = 1;
             }
-            else if (verbose)
+            reply_ttl = 0;
+            print_icmp_reply(icmp_reply, dest_addr, rd - (ip_reply->ihl << 2), reply_ttl, rtt);
+            if (verbose)
             {
+                ret = 0;
                 dump_ip_header(ip_reply);
             }
         }
-        return 1;
+        return ret;
     }
     return 0;
 }
